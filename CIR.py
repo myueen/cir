@@ -34,7 +34,7 @@ def CIR(X, Y, Xt, Yt, a, d):
     X_colmeans = X_df.sum()/n
     # test: print(X_colmeans)
     X_ = X_df - X_colmeans
-    # test: print(X_)
+    print(X_)
 
     Xt_colmean = Xt_df.sum()/m
     Xt_ = Xt_df - Xt_colmean
@@ -53,7 +53,7 @@ def CIR(X, Y, Xt, Yt, a, d):
 
     if is_categorical:
         H = int(Y_df.nunique()[0])
-        print(H)
+        # test: print(H)
     elif is_numerical:
         if d <= 2:
             H = 10
@@ -61,17 +61,33 @@ def CIR(X, Y, Xt, Yt, a, d):
         else:
             H = 4
             # test: print(H)
+        # Partition linearly
+        max_Y = np.max(Y_df)
+        min_Y = np.min(Y_df)
+        width = (max_Y - min_Y) / H
+        partition_pts = [min_Y + i * width for i in range(H)]
+        partition_pts.append(max_Y)
+        # test: print(partition_pts)
 
+    # Define Ph     (Count the # of ocurrence of y in each H interval)
+    Ph = [0] * H
 
+    for elt in Y_df.to_numpy():
+        for i in range(H):
+            if partition_pts[i] <= elt < partition_pts[i + 1]:
+                Ph[i] += 1
+    # test: print(Ph)
 
-
+    # Find th mean: Take each row of X and average among each interval separately
+    mh = []
 
 
 # Test code
 X = [[1, 4, 5],
-     [-5, 8, 9]]
+     [-5, 8, 9],
+     [2, 3, 6]]
 
-Y_numerical = [[1], [2]]
+Y_numerical = [[1], [4.5], [8.3]]
 
 Y_categorical = ["a", "b"]
 
@@ -80,4 +96,4 @@ Xt = [[1, 4, 5],
 
 Yt = [[1], [2]]
 
-CIR(X, Y_categorical, Xt, Yt, 1, 2)
+CIR(X, Y_numerical, Xt, Yt, 1, 2)

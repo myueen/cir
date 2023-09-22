@@ -67,27 +67,45 @@ def CIR(X, Y, Xt, Yt, a, d):
         width = (max_Y - min_Y) / H
         partition_pts = [min_Y + i * width for i in range(H)]
         partition_pts.append(max_Y)
-        # test: print(partition_pts)
+        print(partition_pts)
 
     # Define Ph     (Count the # of ocurrence of y in each H interval)
     Ph = [0] * H
+    mh = [0] * H
 
     for elt in Y_df.to_numpy():
         for i in range(H):
-            if partition_pts[i] <= elt < partition_pts[i + 1]:
+            if partition_pts[i] <= elt <= partition_pts[i + 1]:
                 Ph[i] += 1
-    # test: print(Ph)
+                Y_df.values.tolist().index(elt)
+
+    print(Ph)
 
     # Find th mean: Take each row of X and average among each interval separately
-    mh = []
+    mh = [0] * H
+    interval_indices = []
+
+    # indices = np.searchsorted(partition_pts, elt)
+    # interval_indices.append(indices)
+    # print(interval_indices)
+
+    # for interval in partition_pts:
+    #     indices = np.where(Y_df < interval)
+    # print(indices)
+    # if Ph[i] != 0:
+    #     filtered_mean = (1/Ph[i]) * row_mean[indices]
+    #     i += 1
+    #     mh.append(filtered_mean)
 
 
 # Test code
 X = [[1, 4, 5],
      [-5, 8, 9],
-     [2, 3, 6]]
+     [2, 3, 6],
+     [4, 3, 2],
+     [2, 3, 4]]
 
-Y_numerical = [[1], [4.5], [8.3]]
+Y_numerical = [[1], [8.3], [2.7], [3], [8]]
 
 Y_categorical = ["a", "b"]
 

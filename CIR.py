@@ -1,113 +1,101 @@
 import numpy as np
 import pandas as pd
+from scipy.linalg import eig
 
 
 def CIR(X, Y, Xt, Yt, a, d):
     n = len(X)
     p = len(X[0])
-
     m = len(Xt)
 
-    # Check same dimensions
+    # Parameter Check
     if len(Xt[0]) != p:
-        raise ValueError("Xt should have the same # of columns as X")
+        raise ValueError("Xt should have the same number of columns as X")
 
     if len(Y) != n:
-        raise ValueError("Y must have the same # of rows as X")
+        raise ValueError("Y must have the same number of rows as X")
 
     if len(Yt) != m:
-        raise ValueError("Yt must have the same # of rows as X")
+        raise ValueError("Yt must have the same number of rows as X")
+
+    if not isinstance(d, int):
+        raise TypeError("d parameter must be an integer")
 
     if d < 0:
-        raise ValueError("d must be a non-negative number.")
+        raise ValueError("d must be greater than or equal to 0")
 
     if a < 0:
-        raise ValueError("a must be a non-negative number.")
+        raise ValueError("a must be greater than or equal to 0")
 
     X_df = pd.DataFrame(X)
     Xt_df = pd.DataFrame(Xt)
     Y_df = pd.DataFrame(Y)
     Yt_df = pd.DataFrame(Yt)
-    # test: print(Y_df)
 
     # Center the data
-    X_colmeans = X_df.sum()/n
-    # test: print(X_colmeans)
-    X_ = X_df - X_colmeans
-    print(X_)
-
-    Xt_colmean = Xt_df.sum()/m
-    Xt_ = Xt_df - Xt_colmean
+    X_col_means = X_df.mean(axis=0)
+    X_centered = X_df - X_col_means
+    Xt_col_means = Xt_df.mean(axis=0)
+    Xt_centered = Xt_df - Xt_col_means
 
     # Covariance Matrix
-    X_cov_matrix = (1/n) * np.matmul(X_.transpose(), X_)
-    Xt_cov_matrix = (1/m) * np.matmul(Xt_.transpose(), Xt_)
-    # test: print(X_.transpose())
-    # test: print(X_cov_matrix)
+    X_cov_matrix = X_centered.cov()
+    Xt_cov_matrix = Xt_centered.cov()
 
     # Define H, Ht
-    is_numerical = np.issubdtype(Y_df.to_numpy().dtype, np.number)
-    # test: print(Y_df.dtypes)
-    # test: print(is_numerical)
-    is_categorical = not is_numerical
-
-    if is_categorical:
-        H = int(Y_df.nunique()[0])
-        # test: print(H)
-    elif is_numerical:
+    Y_unique_value = Y_df.nunique().item()
+    Yt_unique_value = Yt_df.nunique().item()
+    if Y_unique_value == 2:
+        H = 2
+    elif Y_unique_value > 2 & Y_unique_value <= 10:
+        H = Y_unique_value
+    else:
         if d <= 2:
             H = 10
-            # test: print(H)
         else:
             H = 4
-            # test: print(H)
-        # Partition linearly
-        max_Y = np.max(Y_df)
-        min_Y = np.min(Y_df)
-        width = (max_Y - min_Y) / H
-        partition_pts = [min_Y + i * width for i in range(H)]
-        partition_pts.append(max_Y)
-        print(partition_pts)
+
+    if Yt_unique_value == 2:
+        Ht = 2
+    elif Yt_unique_value > 2 & Yt_unique_value <= 10:
+        Ht = Yt_unique_value
+    else:
+        if d <= 2:
+            Ht = 10
+        else:
+            Ht = 4
 
     # Define Ph     (Count the # of ocurrence of y in each H interval)
-    Ph = [0] * H
-    mh = [0] * H
+    interval_Ph = pd.cut(Y_df[0], bins=H)
+    Ph = interval_Ph.value_counts().sort_index()  # interval_counts
 
-    for elt in Y_df.to_numpy():
-        for i in range(H):
-            if partition_pts[i] <= elt <= partition_pts[i + 1]:
-                Ph[i] += 1
-                Y_df.values.tolist().index(elt)
+    # Find the mean: Take each row of X and average among each interval separately
+    interval = np.linspace(np.min(Y), np.max(Y), num=H+1)
+    mask = (Y >= interval[:-1, np.newaxis]) & (Y <= interval[1:, np.newaxis])
+    mh = np.mean(X_centered[mask], axis=0)
+    print(mh)
 
-    print(Ph)
+    # Cov(E[X|Y])
+    sigma_X = np.outer(mh, mh)
 
-    # Find th mean: Take each row of X and average among each interval separately
-    mh = [0] * H
-    interval_indices = []
+    if a == 0:
+        v = eig(X_cov_matrix, sigma_X)
+        f_v = - np.trace()
 
-    # indices = np.searchsorted(partition_pts, elt)
-    # interval_indices.append(indices)
-    # print(interval_indices)
-
-    # for interval in partition_pts:
-    #     indices = np.where(Y_df < interval)
-    # print(indices)
-    # if Ph[i] != 0:
-    #     filtered_mean = (1/Ph[i]) * row_mean[indices]
-    #     i += 1
-    #     mh.append(filtered_mean)
+    elif a > 0:
+        A = np.dot(np.dot(X_cov_matrix, sigma_X), X_cov_matrix)
+        B = np.dot(X_cov_matrix, X_cov_matrix)
 
 
 # Test code
 X = [[1, 4, 5],
      [-5, 8, 9],
-     [2, 3, 6],
-     [4, 3, 2],
-     [2, 3, 4]]
+     [2, 3, 6]]
 
-Y_numerical = [[1], [8.3], [2.7], [3], [8]]
-
-Y_categorical = ["a", "b"]
+Y_numerical = [1, 8.3, 2.7]
+Y_binary = [0, 1, 1]
+Y_unique_less_10 = [1, 2, 3]
+Y_categorical = ["a", "b", "b"]
 
 Xt = [[1, 4, 5],
       [-5, 8, 9]]

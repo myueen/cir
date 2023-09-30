@@ -73,7 +73,6 @@ def CIR(X, Y, Xt, Yt, a, d):
     interval = np.linspace(np.min(Y), np.max(Y), num=H+1)
     mask = (Y >= interval[:-1, np.newaxis]) & (Y <= interval[1:, np.newaxis])
     mh = np.mean(X_centered[mask], axis=0)
-    print(mh)
 
     # Cov(E[X|Y])
     sigma_X = np.outer(mh, mh)
@@ -85,6 +84,33 @@ def CIR(X, Y, Xt, Yt, a, d):
     elif a > 0:
         A = np.dot(np.dot(X_cov_matrix, sigma_X), X_cov_matrix)
         B = np.dot(X_cov_matrix, X_cov_matrix)
+
+    # print("Original Matix")
+    # print(X_df)
+    # print("             ")
+    # print("Centered Matix")
+    # print(X_centered)
+    # print("             ")
+    # print("Covariance Matix for X")
+    # print(X_cov_matrix)
+
+    # print("             ")
+    # print("Y original 1d array")
+    # print(Y_df)
+    # print("             ")
+    # print("Number of unique value in Y")
+    # print(Y_unique_value)
+    # print("             ")
+    # print("H: # intervals split range(Y)")
+    # print(H)
+    # print("             ")
+    # print("Intervals and count: ")
+    # print(Ph)
+
+    print(interval)
+    print(mask)
+    print("")
+    print(mh)
 
 
 # Test code

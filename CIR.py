@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.linalg import eigh
-from scipy.optimize import minimize
-from pymanopt.manifolds import Stiefel
-from pymanopt import Problem
+import matlab.engine
 
 
 def CIR(X, Y, Xt, Yt, a, d):
@@ -85,23 +83,24 @@ def CIR(X, Y, Xt, Yt, a, d):
     # Generalized Eigenvalue Decomposition
     A = np.matmul(np.matmul(X_cov_matrix_a, sigma_X_a), X_cov_matrix_a)
     B = np.matmul(X_cov_matrix_a, X_cov_matrix_a)
+    eigenvalues, eigenvectors = eigh(X_cov_matrix_a, sigma_X_a)
+    v = eigenvectors[:d, :]
 
     if a == 0:
-        eigenvalues, eigenvectors = eigh(X_cov_matrix_a, sigma_X_a)
-        v = eigenvectors[:d, :]
         return v, f(A, B, a, v, 0, 0)
 
     # ====================================================================================
-    # ====================================================================================
-    # The following are the same process to calculate the background data
-    # And the case when a > 0
+    # Background data and the case when a > 0
 
-    # background data
+    # Center the data
     Xt_col_means = Xt_df.mean(axis=0)
     Xt_centered = Xt_df - Xt_col_means
-    Xt_cov_matrix = Xt_centered.cov()
-    Yt_unique_value = Yt_df.nunique().item()
 
+    # Covariance Matrix
+    Xt_cov_matrix = Xt_centered.cov()
+
+    # Define H, Ht
+    Yt_unique_value = Yt_df.nunique().item()
     if Yt_unique_value == 2:
         Ht = 2
     elif Yt_unique_value > 2 & Yt_unique_value <= 10:
@@ -112,8 +111,11 @@ def CIR(X, Y, Xt, Yt, a, d):
         else:
             Ht = 4
 
+    # Define Ph
     interval_Ph_t = pd.cut(Yt_df[0], bins=Ht)
     Ph_t = interval_Ph_t.value_counts().sort_index()
+
+    # Find the mean: Take each row of X and average among each interval separately
     interval_t = np.linspace(np.min(Yt), np.max(Yt), num=Ht+1)
     mh_t = []
 
@@ -122,34 +124,31 @@ def CIR(X, Y, Xt, Yt, a, d):
         xt_rows_mean = np.mean(Xt_centered[mask_t], axis=0)
         mh_t.append(xt_rows_mean)
 
+    mh_t_array = np.array(mh_t)
+
+    # Cov(E[X|Y])
     sigma_Xt = np.zeros((Xt_centered.shape[1], Xt_centered.shape[1]))
     for i in range(len(interval_t) - 1):
         mask_t = (Yt >= interval_t[i]) & (Yt <= interval_t[i+1])
-        interval_mh_t = mh_t[i]
+        interval_mh_t = mh_t_array[i]
         outer_product_t = np.outer(interval_mh_t, interval_mh_t)
+
         if not np.isnan(outer_product_t).any():
             sigma_Xt += outer_product_t
-        sigma_Xt += outer_product_t
 
-    # f(v)
-    sigma_Xt_df = pd.DataFrame(sigma_Xt)
-    At = np.matmul(np.matmul(Xt_cov_matrix, sigma_Xt_df), Xt_cov_matrix)
-    Bt = np.matmul(Xt_cov_matrix, Xt_cov_matrix)
-    bv_inverse_t = np.linalg.inv(np.matmul(np.matmul(v.T, Bt), v))
-    va_t = np.matmul(np.matmul(v.T, At), v)
-    trace_ab_t = np.matmul(va_t, bv_inverse_t)
+    sigma_Xt_a = np.array(sigma_Xt)
+    Xt_cov_matrix_a = np.array(Xt_cov_matrix)
 
-    # gradient f(v)
-    # avb = np.dot(np.dot(A, v), bv_inverse) - \
-    #     np.dot(np.dot(np.dot(np.dot(B, v), bv_inverse), va), bv_inverse)
-    # avb_t = np.dot(np.dot(At, v), bv_inverse_t) - \
-    #     np.dot(np.dot(np.dot(np.dot(Bt, v), bv_inverse_t), va_t), bv_inverse_t)
-    # grad = -2 * (avb - a * (avb_t))
+    # Generalized Eigenvalue Decomposition
+    At = np.matmul(np.matmul(Xt_cov_matrix_a, sigma_Xt_a), Xt_cov_matrix_a)
+    Bt = np.matmul(Xt_cov_matrix_a, Xt_cov_matrix_a)
 
-    # if a > 0:
-    # f_v = -1 * (np.trace(trace_ab)) + a * (np.trace(trace_ab_t))
+    eng = matlab.engine.start_matlab()
+    Xq, out, F_eval, Grad = eng.SGPM(
+        X=grad(A, B, a, v, At, Bt), fun=f(A, B, a, v, At, Bt))
+    eng.quit()
+    print(Xq)
 
-    # ====================================================================================
     # ====================================================================================
     # The following are print statement for code testing.
     # print("Original Matix")
@@ -177,8 +176,31 @@ def CIR(X, Y, Xt, Yt, a, d):
 def f(A, B, a, v, At=0, Bt=0):
     bv_inverse = np.linalg.inv(np.matmul(np.matmul(v.T, B), v))
     va = np.matmul(np.matmul(v.T, A), v)
-    f_v = -1 * (np.trace(np.matmul(va, bv_inverse)))
+    if a == 0:
+        f_v = -1 * (np.trace(np.matmul(va, bv_inverse)))
+
+    if a > 0:
+        bv_t_inverse = np.linalg.inv(np.matmul(np.matmul(v.T, Bt), v))
+        va_t = np.matmul(np.matmul(v.T, At), v)
+        f_v = -1 * (np.trace(np.matmul(va, bv_inverse))) + a * \
+            (np.trace(np.matmul(va_t, bv_t_inverse)))
+
     return f_v
+
+
+def grad(A, B, a, v, At, Bt):
+    bv_inverse = np.linalg.inv(np.matmul(np.matmul(v.T, B), v))
+    va = np.matmul(np.matmul(v.T, A), v)
+    bv_t_inverse = np.linalg.inv(np.matmul(np.matmul(v.T, Bt), v))
+    va_t = np.matmul(np.matmul(v.T, At), v)
+
+    avb = np.matmul(np.matmul(A, v), bv_inverse) - \
+        np.matmul(np.matmul(np.matmul(np.matmul(B, v), bv_inverse), va), bv_inverse)
+    avb_t = np.matmul(np.matmul(At, v), bv_t_inverse) - np.matmul(
+        np.matmul(np.matmul(np.matmul(Bt, v), bv_t_inverse), va_t), bv_t_inverse)
+    gradient = -2 * (avb - a * (avb_t))
+
+    return gradient
 
 
 # Test code
@@ -207,11 +229,12 @@ Y_unique_less_10 = [1, 2, 3]
 Y_categorical = ["a", "b", "b"]
 
 Xt = [[1, 4, 5],
-      [-5, 8, 9]]
+      [-5, 8, 9],
+      [28, 21, 14]]
 
-Yt = [[1], [2]]
+Yt = [1, 9, 21]
 
-result = CIR(X3, Y1, Xt, Yt, 0, 3)
-# print(result)
+result = CIR(X3, Y1, Xt, Yt, 2, 3)
+print(result)
 # print(result[0])
 # print(result[1])

@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 from scipy.linalg import eigh
-import matlab.engine
+import pymanopt
+import pymanopt.manifolds
+import pymanopt.optimizers
 
 
 def CIR(X, Y, Xt, Yt, a, d):
@@ -11,22 +13,22 @@ def CIR(X, Y, Xt, Yt, a, d):
 
     # Parameter Check
     if len(Xt[0]) != p:
-        raise ValueError("Xt should have the same number of columns as X")
+        raise ValueError('Xt should have the same number of columns as X')
 
     if len(Y) != n:
-        raise ValueError("Y must have the same number of rows as X")
+        raise ValueError('Y must have the same number of rows as X')
 
     if len(Yt) != m:
-        raise ValueError("Yt must have the same number of rows as Xt")
+        raise ValueError('Yt must have the same number of rows as Xt')
 
     if not isinstance(d, int):
-        raise TypeError("d parameter must be an integer")
+        raise TypeError('d parameter must be an integer')
 
     if d < 1:
-        raise ValueError("d must be greater than or equal to 1")
+        raise ValueError('d must be greater than or equal to 1')
 
     if a < 0:
-        raise ValueError("a must be greater than or equal to 0")
+        raise ValueError('a must be greater than or equal to 0')
 
     X_df = pd.DataFrame(X)
     Xt_df = pd.DataFrame(Xt)
@@ -40,7 +42,7 @@ def CIR(X, Y, Xt, Yt, a, d):
     # Covariance Matrix
     X_cov_matrix = X_centered.cov()
 
-    # Define H, Ht
+    # Define H
     Y_unique_value = Y_df.nunique().item()
     if Y_unique_value == 2:
         H = 2
@@ -99,7 +101,7 @@ def CIR(X, Y, Xt, Yt, a, d):
     # Covariance Matrix
     Xt_cov_matrix = Xt_centered.cov()
 
-    # Define H, Ht
+    # Define Ht
     Yt_unique_value = Yt_df.nunique().item()
     if Yt_unique_value == 2:
         Ht = 2
@@ -111,7 +113,7 @@ def CIR(X, Y, Xt, Yt, a, d):
         else:
             Ht = 4
 
-    # Define Ph
+    # Define Ph_t
     interval_Ph_t = pd.cut(Yt_df[0], bins=Ht)
     Ph_t = interval_Ph_t.value_counts().sort_index()
 
@@ -126,7 +128,7 @@ def CIR(X, Y, Xt, Yt, a, d):
 
     mh_t_array = np.array(mh_t)
 
-    # Cov(E[X|Y])
+    # Cov(E[Xt|Yt])
     sigma_Xt = np.zeros((Xt_centered.shape[1], Xt_centered.shape[1]))
     for i in range(len(interval_t) - 1):
         mask_t = (Yt >= interval_t[i]) & (Yt <= interval_t[i+1])
@@ -143,11 +145,6 @@ def CIR(X, Y, Xt, Yt, a, d):
     At = np.matmul(np.matmul(Xt_cov_matrix_a, sigma_Xt_a), Xt_cov_matrix_a)
     Bt = np.matmul(Xt_cov_matrix_a, Xt_cov_matrix_a)
 
-    eng = matlab.engine.start_matlab()
-    Xq, out, F_eval, Grad = eng.SGPM(
-        X=grad(A, B, a, v, At, Bt), fun=f(A, B, a, v, At, Bt))
-    eng.quit()
-    print(Xq)
 
     # ====================================================================================
     # The following are print statement for code testing.
@@ -201,40 +198,3 @@ def grad(A, B, a, v, At, Bt):
     gradient = -2 * (avb - a * (avb_t))
 
     return gradient
-
-
-# Test code
-X = [[1, 4, 5],
-     [-5, 8, 9],
-     [2, 3, 6]]
-
-X1 = [[10, 18, 5],
-      [-8, 11, 12],
-      [2, 17, 2]]
-
-X2 = [[55, 28, 34],
-      [30, 32, 35],
-      [45, 29, 28]]
-
-X3 = [[120, 28, 34],
-      [30, 98, 35],
-      [45, 103, 28],
-      [33, 62, 59],
-      [89, 75, 28]]
-
-Y_numerical = [1, 8.3, 2.7]
-Y1 = [1, 13, 20, 55, 23]
-Y_binary = [0, 1, 1]
-Y_unique_less_10 = [1, 2, 3]
-Y_categorical = ["a", "b", "b"]
-
-Xt = [[1, 4, 5],
-      [-5, 8, 9],
-      [28, 21, 14]]
-
-Yt = [1, 9, 21]
-
-result = CIR(X3, Y1, Xt, Yt, 2, 3)
-print(result)
-# print(result[0])
-# print(result[1])

@@ -1,5 +1,11 @@
+import csv
 from CIR import CIR
 
+# with open("foregroundX.csv", 'r') as file:
+#     csvreader = csv.reader(file)
+
+#     for row in csvreader:
+#         print(row)
 
 # Test code
 X = [[1, 4, 5],
@@ -36,15 +42,39 @@ Y_categorical = ["a", "b", "b", "c", "d", "d", "e"]
 
 Xt = [[1, 4, 5],
       [-5, 8, 9],
-      [28, 21, 14]]
+      [28, 21, 14],
+      [1, 15, 5],
+      [18, 8, 20],
+      [28, 34, 14]]
 
-Yt = [1, 9, 21]
+Yt = [1, 9, 21, 30, 20, 40]
 
 
-result = CIR(X4, Y_unique_less_10, Xt, Yt, 0, 3)
+result = CIR(X4, Y_unique_less_10, Xt, Yt, 2, 3)
 print(result)
 # print(result[0])
 # print(result[1])
 
 
-
+# ====================================================================================
+    # The following are print statement for code testing.
+    # print("Original Matix")
+    # print(X_df)
+    # print("             ")
+    # print("Centered Matix")
+    # print(X_centered)
+    # print("             ")
+    # print("Covariance Matix for X")
+    # print(X_cov_matrix)
+    # print("             ")
+    # print("Y original 1d array")
+    # print(Y_df)
+    # print("             ")
+    # print("Number of unique value in Y")
+    # print(Y_unique_value)
+    # print("             ")
+    # print("H: # intervals split range(Y)")
+    # print(H)
+    # print("             ")
+    # print("Intervals and count: ")
+    # print(Ph)

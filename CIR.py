@@ -4,6 +4,10 @@ from scipy.linalg import eigh
 import pymanopt
 import pymanopt.manifolds
 import pymanopt.optimizers
+import torch
+import geoopt
+from geoopt.manifolds import Stiefel
+from geoopt.optim import RiemannianSGD
 
 
 def CIR(X, Y, Xt, Yt, a, d):
@@ -83,14 +87,14 @@ def CIR(X, Y, Xt, Yt, a, d):
     X_cov_matrix_a = np.array(X_cov_matrix)
 
     # Generalized Eigenvalue Decomposition
-    A = np.matmul(np.matmul(X_cov_matrix_a, sigma_X_a), X_cov_matrix_a)
-    B = np.matmul(X_cov_matrix_a, X_cov_matrix_a)
+    A = X_cov_matrix_a @ sigma_X_a @ X_cov_matrix_a 
+    B = X_cov_matrix_a @ X_cov_matrix_a 
     eigenvalues, eigenvectors = eigh(X_cov_matrix_a, sigma_X_a)
     v = eigenvectors[:d, :]
+    f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
 
     if a == 0:
-        return v, f(A, B, a, v, 0, 0)
-
+        return v, f_v
     # =======================================================================================
     # Background data and the case when a > 0
 
@@ -142,39 +146,45 @@ def CIR(X, Y, Xt, Yt, a, d):
     Xt_cov_matrix_a = np.array(Xt_cov_matrix)
 
     # Generalized Eigenvalue Decomposition
-    At = np.matmul(np.matmul(Xt_cov_matrix_a, sigma_Xt_a), Xt_cov_matrix_a)
-    Bt = np.matmul(Xt_cov_matrix_a, Xt_cov_matrix_a)
+    At = Xt_cov_matrix_a @ sigma_Xt_a @ Xt_cov_matrix_a 
+    Bt = Xt_cov_matrix_a @ Xt_cov_matrix_a
 
 
-    # ====================================================================================
-    # The following are print statement for code testing.
-    # print("Original Matix")
-    # print(X_df)
-    # print("             ")
-    # print("Centered Matix")
-    # print(X_centered)
-    # print("             ")
-    # print("Covariance Matix for X")
-    # print(X_cov_matrix)
-    # print("             ")
-    # print("Y original 1d array")
-    # print(Y_df)
-    # print("             ")
-    # print("Number of unique value in Y")
-    # print(Y_unique_value)
-    # print("             ")
-    # print("H: # intervals split range(Y)")
-    # print(H)
-    # print("             ")
-    # print("Intervals and count: ")
-    # print(Ph)
+    # Optimization on Manifolds
+    # Specify the dimension of the Stiefel manifold
+    v = torch.randn(n, p)
+    v, _ = torch.linalg.qr(v)
+
+    v = geoopt.ManifoldParameter(v, manifold=geoopt.Stiefel())
+    optimizer = RiemannianSGD([v], lr=0.1)
+
+    for step in range(100): 
+        optimizer.zero_grad()
+        gradient = grad(A, B, a, v, At, Bt)
+        cost = f(A, B, a, v, At, Bt)
+        optimizer.step()
+
+    optimized_matrix = v
+
+    print("Optimized Orthonormal Matrix: ")
+    print(optimized_matrix)
+
+    optimized_tensor = v.detached.clone()
+    print("Optimized Orthonormmal Matrix (as PyTorch tensor):")
+    print(optimized_tensor)
 
 
-def f(A, B, a, v, At=0, Bt=0):
-    bv_inverse = np.linalg.inv(np.matmul(np.matmul(v.T, B), v))
+
+def f(A, B, a, v, At, Bt):
+    A_tensor = torch.tensor(A)
+    B_tensor = torch.tensor(B)
+    At_tensor = torch.tensor(At)
+    Bt_tensor = torch.tensor(Bt)
+    v_tensor = torch.tensor(v)
+
+    bv_inverse = torch.inverse(torch.matmul(torch.matmul(v_tensor.t(), B_tensor), v_tensor))
+    np.linalg.inv(np.matmul(np.matmul(v.T, B), v))
     va = np.matmul(np.matmul(v.T, A), v)
-    if a == 0:
-        f_v = -1 * (np.trace(np.matmul(va, bv_inverse)))
 
     if a > 0:
         bv_t_inverse = np.linalg.inv(np.matmul(np.matmul(v.T, Bt), v))
@@ -186,15 +196,14 @@ def f(A, B, a, v, At=0, Bt=0):
 
 
 def grad(A, B, a, v, At, Bt):
-    bv_inverse = np.linalg.inv(np.matmul(np.matmul(v.T, B), v))
-    va = np.matmul(np.matmul(v.T, A), v)
-    bv_t_inverse = np.linalg.inv(np.matmul(np.matmul(v.T, Bt), v))
-    va_t = np.matmul(np.matmul(v.T, At), v)
+    bv_inverse = np.linalg.inv(v.T @ B @ v) 
+    va = v.T @ A @ v
 
-    avb = np.matmul(np.matmul(A, v), bv_inverse) - \
-        np.matmul(np.matmul(np.matmul(np.matmul(B, v), bv_inverse), va), bv_inverse)
-    avb_t = np.matmul(np.matmul(At, v), bv_t_inverse) - np.matmul(
-        np.matmul(np.matmul(np.matmul(Bt, v), bv_t_inverse), va_t), bv_t_inverse)
+    bv_t_inverse = np.linalg.inv(v.T @ Bt @ v)  
+    va_t = v.T @ At @ v 
+
+    avb = A @ v @ bv_inverse - B @ v @ bv_inverse @ va @ bv_inverse
+    avb_t = At @ v @ bv_t_inverse - Bt @ v @ bv_t_inverse @ va_t @ bv_t_inverse
     gradient = -2 * (avb - a * (avb_t))
 
     return gradient

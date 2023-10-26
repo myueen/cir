@@ -4,7 +4,7 @@ from scipy.linalg import solve_triangular
 from scipy.linalg import cholesky
 import time
 
-def SGPM(X, fun, opts, *varargin):
+def SGPM(X, fun, grad):
     # size information
     X = np.array(X)
     if not X.any: 
@@ -13,11 +13,9 @@ def SGPM(X, fun, opts, *varargin):
         n = X.shape[0]
         k = X.shape[1]
 
-    if 'xtol' in opts:
-        if opts['xtol'] < 0 or opts['xtol'] > 1: 
-            opts['xtol'] = 1e-6
-    else: 
-        opts['xtol'] = 1e-6
+    opts = {}
+    opts['xtol'] = 1e-6
+    
 
     if 'gtol' in opts:
         if opts['gtol'] < 0 or opts['gtol'] > 1:

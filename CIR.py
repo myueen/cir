@@ -90,10 +90,10 @@ def CIR(X, Y, Xt, Yt, a, d):
     A = X_cov_matrix_a @ sigma_X_a @ X_cov_matrix_a 
     B = X_cov_matrix_a @ X_cov_matrix_a 
     eigenvalues, eigenvectors = eigh(X_cov_matrix_a, sigma_X_a)
-    v = eigenvectors[:d, :]
-    f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
-
+    
     if a == 0:
+        v = eigenvectors[:d, :]
+        f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
         return v, f_v
     # =======================================================================================
     # Background data and the case when a > 0
@@ -149,18 +149,20 @@ def CIR(X, Y, Xt, Yt, a, d):
     At = Xt_cov_matrix_a @ sigma_Xt_a @ Xt_cov_matrix_a 
     Bt = Xt_cov_matrix_a @ Xt_cov_matrix_a
 
+    print(p)
+    print(d)
+    # Optimization on Manifold
+    initial_guess = torch.randn(p, d)
+    initial_guess, _ = torch.linalg.qr(initial_guess)
 
-    # Optimization on Manifolds
-    # Specify the dimension of the Stiefel manifold
-    v = torch.randn(n, p)
-    v, _ = torch.linalg.qr(v)
-
-    v = geoopt.ManifoldParameter(v, manifold=geoopt.Stiefel())
+    v = geoopt.ManifoldParameter(initial_guess, manifold=geoopt.Stiefel(p, d))
     optimizer = RiemannianSGD([v], lr=0.1)
 
+    
     for step in range(100): 
         optimizer.zero_grad()
         gradient = grad(A, B, a, v, At, Bt)
+        v.manifold.proju(v, gradient)
         cost = f(A, B, a, v, At, Bt)
         optimizer.step()
 
@@ -176,34 +178,38 @@ def CIR(X, Y, Xt, Yt, a, d):
 
 
 def f(A, B, a, v, At, Bt):
-    A_tensor = torch.tensor(A)
-    B_tensor = torch.tensor(B)
-    At_tensor = torch.tensor(At)
-    Bt_tensor = torch.tensor(Bt)
-    v_tensor = torch.tensor(v)
+    A = torch.tensor(A)
+    B = torch.tensor(B)
+    At = torch.tensor(At)
+    Bt = torch.tensor(Bt)
+    v = torch.tensor(v)
 
-    bv_inverse = torch.inverse(torch.matmul(torch.matmul(v_tensor.t(), B_tensor), v_tensor))
-    np.linalg.inv(np.matmul(np.matmul(v.T, B), v))
-    va = np.matmul(np.matmul(v.T, A), v)
-
-    if a > 0:
-        bv_t_inverse = np.linalg.inv(np.matmul(np.matmul(v.T, Bt), v))
-        va_t = np.matmul(np.matmul(v.T, At), v)
-        f_v = -1 * (np.trace(np.matmul(va, bv_inverse))) + a * \
-            (np.trace(np.matmul(va_t, bv_t_inverse)))
-
+    bv_inv = torch.inverse(torch.matmul(torch.matmul(v.t(), B), v))
+    va = torch.matmul(torch.matmul(v.T, A), v)
+    bv_t_inv = torch.inverse(torch.matmul(torch.matmul(v.t(), Bt), v))
+    va_t = torch.matmul(torch.matmul(v.T, At), v)
+        
+    f_v = -torch.trace(torch.matmul(va, bv_inv)) + a * torch.trace(torch.matmul(va_t, bv_t_inv)) 
+     
     return f_v
 
 
 def grad(A, B, a, v, At, Bt):
-    bv_inverse = np.linalg.inv(v.T @ B @ v) 
-    va = v.T @ A @ v
+    A = torch.tensor(A)
+    B = torch.tensor(B)
+    At = torch.tensor(At)
+    Bt = torch.tensor(Bt)
+    v = torch.tensor(v)
 
-    bv_t_inverse = np.linalg.inv(v.T @ Bt @ v)  
-    va_t = v.T @ At @ v 
-
-    avb = A @ v @ bv_inverse - B @ v @ bv_inverse @ va @ bv_inverse
-    avb_t = At @ v @ bv_t_inverse - Bt @ v @ bv_t_inverse @ va_t @ bv_t_inverse
-    gradient = -2 * (avb - a * (avb_t))
+    bv_inv = torch.inverse(v.t() @ B @ v)
+    va = v.t() @ A @ v
+    bv_t_inv = torch.inverse(v.t() @ Bt @ v)
+    va_t = v.t() @ At @ v
+        
+    avb = A @ v @ bv_inv - B @ v @ bv_inv @ va @ bv_inv
+    avb_t = At @ v @ bv_t_inv - Bt @ v @ bv_t_inv @ va_t @ bv_t_inv 
+   
+    gradient = -2 * (avb - a * avb_t)
 
     return gradient
+

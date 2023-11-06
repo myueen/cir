@@ -7,12 +7,19 @@ from geoopt.optim import RiemannianSGD
 
 
 def CIR(X, Y, Xt, Yt, a, d):
+    X = pd.DataFrame(X)
+    Xt = pd.DataFrame(Xt)
+    Y = pd.DataFrame(Y)
+    Yt = pd.DataFrame(Yt)
+
+    # n represents the rows of X. p represents the
+    # columns of X. m represent the rows of Xt.
     n = len(X)
-    p = len(X[0])
+    p = len(X.columns)
     m = len(Xt)
 
     # Parameter Check
-    if len(Xt[0]) != p:
+    if len(Xt.columns) != p:
         raise ValueError('Xt should have the same number of columns as X')
 
     if len(Y) != n:
@@ -30,15 +37,10 @@ def CIR(X, Y, Xt, Yt, a, d):
     if a < 0:
         raise ValueError('a must be greater than or equal to 0')
 
-    X_df = pd.DataFrame(X)
-    Xt_df = pd.DataFrame(Xt)
-    Y_df = pd.DataFrame(Y)
-    Yt_df = pd.DataFrame(Yt)
-
-    # Center the data
-    X_col_means = X_df.mean(axis=0)
-    print(X_col_means)
-    # X_centered = X_df - X_col_means
+    # Center the matrix X by subtracting the
+    # original matrix X by the column means of X
+    X_col_means = X.mean(axis=0)
+    X = X - X_col_means
 
     # # Covariance Matrix
     # X_cov_matrix = X_centered.cov()

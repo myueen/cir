@@ -37,57 +37,56 @@ def CIR(X, Y, Xt, Yt, a, d):
 
     # Center the data
     X_col_means = X_df.mean(axis=0)
-    X_centered = X_df - X_col_means
+    print(X_col_means)
+    # X_centered = X_df - X_col_means
 
-    # Covariance Matrix
-    X_cov_matrix = X_centered.cov()
+    # # Covariance Matrix
+    # X_cov_matrix = X_centered.cov()
 
-    # Define H
-    Y_unique_value = Y_df.nunique().item()
-    if Y_unique_value == 2:
-        H = 2
-    elif Y_unique_value > 2 & Y_unique_value <= 10:
-        H = Y_unique_value
-    else:
-        if d <= 2:
-            H = 10
-        else:
-            H = 4
+    # # Define H
+    # Y_unique_value = Y_df.nunique().item()
+    # if Y_unique_value == 2:
+    #     H = 2
+    # elif Y_unique_value > 2 & Y_unique_value <= 10:
+    #     H = Y_unique_value
+    # else:
+    #     if d <= 2:
+    #         H = 10
+    #     else:
+    #         H = 4
 
-    # Define Ph     (Count the # of ocurrence of y in each H interval)
-    interval_Ph = pd.cut(Y_df[0], bins=H)
-    Ph = interval_Ph.value_counts().sort_index()
+    # # Define Ph     (Count the # of ocurrence of y in each H interval)
+    # interval_Ph = pd.cut(Y_df[0], bins=H)
+    # Ph = interval_Ph.value_counts().sort_index()
 
-    # Find the mean: Take each row of X and average among each interval separately
-    interval = np.linspace(np.min(Y), np.max(Y), num=H+1)
+    # # Find the mean: Take each row of X and average among each interval separately
+    # interval = np.linspace(np.min(Y), np.max(Y), num=H+1)
 
-    mh = []
-    for i in range(len(interval) - 1):
-        mask = (Y >= interval[i]) & (Y <= interval[i+1])
-        x_rows_mean = np.mean(X_centered[mask], axis=0)
-        mh.append(x_rows_mean)
+    # mh = []
+    # for i in range(len(interval) - 1):
+    #     mask = (Y >= interval[i]) & (Y <= interval[i+1])
+    #     x_rows_mean = np.mean(X_centered[mask], axis=0)
+    #     mh.append(x_rows_mean)
 
-    mh_array = np.array(mh)
+    # mh_array = np.array(mh)
 
-    # Cov(E[X|Y])
-    sigma_X = np.zeros((X_centered.shape[1], X_centered.shape[1]))
-    for i in range(len(interval) - 1):
-        mask = (Y >= interval[i]) & (Y <= interval[i+1])
-        interval_mh = mh_array[i]
-        outer_product = np.outer(interval_mh, interval_mh)
+    # # Cov(E[X|Y])
+    # sigma_X = np.zeros((X_centered.shape[1], X_centered.shape[1]))
+    # for i in range(len(interval) - 1):
+    #     mask = (Y >= interval[i]) & (Y <= interval[i+1])
+    #     interval_mh = mh_array[i]
+    #     outer_product = np.outer(interval_mh, interval_mh)
 
-        if not np.isnan(outer_product).any():
-            sigma_X += outer_product
+    #     if not np.isnan(outer_product).any():
+    #         sigma_X += outer_product
 
-    sigma_X_a = np.array(sigma_X)
-    X_cov_matrix_a = np.array(X_cov_matrix)
+    # sigma_X_a = np.array(sigma_X)
+    # X_cov_matrix_a = np.array(X_cov_matrix)
 
-    # Generalized Eigenvalue Decomposition
-    A = X_cov_matrix_a @ sigma_X_a @ X_cov_matrix_a
-    B = X_cov_matrix_a @ X_cov_matrix_a
-    eigenvalues, eigenvectors = eigh(X_cov_matrix_a, sigma_X_a)
-
-    print(A)
+    # # Generalized Eigenvalue Decomposition
+    # A = X_cov_matrix_a @ sigma_X_a @ X_cov_matrix_a
+    # B = X_cov_matrix_a @ X_cov_matrix_a
+    # eigenvalues, eigenvectors = eigh(X_cov_matrix_a, sigma_X_a)
 
 #     if a == 0:
 #         v = eigenvectors[:d, :]

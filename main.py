@@ -2,10 +2,14 @@ import csv
 from CIR_ import CIR
 import pandas as pd
 
-# # Test code
-# X = [[1, 4, 5],
-#      [-5, 8, 9],
-#      [2, 3, 6]]
+# Test code
+X = [[1, 4, 5],
+     [-5, 8, 9],
+     [2, 3, 6]]
+
+Xt = [[1, 2, 3],
+      [2, 3, 4],
+      [2, 4, 1]]
 
 # X1 = [[10, 18, 5],
 #       [-8, 11, 12],
@@ -29,7 +33,9 @@ import pandas as pd
 #       [104, 112, 38],
 #       [123, 77, 38]]
 
-# Y_numerical = [1, 8.3, 2.7]
+Y_numerical = [1, 8.3, 2.7]
+Yt = [1, 2, 3]
+CIR(X, Y_numerical, Xt, Yt, 2, 2)
 # Y1 = [1, 13, 20, 55, 23]
 # Y_binary = [0, 1, 1, 0, 1, 1, 0, 1, 0]
 # Y_unique_less_10 = [20, 40, 23, 10, 39, 72, 42]

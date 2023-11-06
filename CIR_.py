@@ -42,23 +42,25 @@ def CIR(X, Y, Xt, Yt, a, d):
     X_col_means = X.mean(axis=0)
     X = X - X_col_means
 
-    # # Covariance Matrix
-    # X_cov_matrix = X_centered.cov()
+    # Calculate the Covariance Matrix
+    X_cov_matrix = X.cov()
 
-    # # Define H
-    # Y_unique_value = Y_df.nunique().item()
-    # if Y_unique_value == 2:
-    #     H = 2
-    # elif Y_unique_value > 2 & Y_unique_value <= 10:
-    #     H = Y_unique_value
-    # else:
-    #     if d <= 2:
-    #         H = 10
-    #     else:
-    #         H = 4
+    # Define H
+    Y_unique_value = Y.nunique().item()
+    if Y_unique_value == 2:
+        H = 2
+    elif Y_unique_value > 2 & Y_unique_value <= 10:
+        H = Y_unique_value
+    else:
+        if d <= 2:
+            H = 10
+        else:
+            H = 4
 
-    # # Define Ph     (Count the # of ocurrence of y in each H interval)
-    # interval_Ph = pd.cut(Y_df[0], bins=H)
+    print(H)
+
+    # Define Ph. Count the # of ocurrence of y in each H interval.
+    # interval_Ph = pd.cut(Y[0], bins=H)
     # Ph = interval_Ph.value_counts().sort_index()
 
     # # Find the mean: Take each row of X and average among each interval separately

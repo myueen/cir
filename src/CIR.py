@@ -149,8 +149,6 @@ def CIR(X, Y, Xt, Yt, a, d):
     At = Xt_cov_matrix_a @ sigma_Xt_a @ Xt_cov_matrix_a 
     Bt = Xt_cov_matrix_a @ Xt_cov_matrix_a
 
-    print(p)
-    print(d)
     # Optimization on Manifold
     initial_guess = torch.randn(p, d)
     initial_guess, _ = torch.linalg.qr(initial_guess)

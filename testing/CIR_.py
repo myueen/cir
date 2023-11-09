@@ -12,6 +12,9 @@ def CIR(X, Y, Xt, Yt, a, d):
     Y = pd.DataFrame(Y)
     Yt = pd.DataFrame(Yt)
 
+    if X.iloc[:, 0].dtypes != X.iloc[:, 1].dtypes:
+        X = X.iloc[:, 1:]
+
     # n represents the rows of X. p represents the
     # columns of X. m represent the rows of Xt.
     n = len(X)

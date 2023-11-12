@@ -13,25 +13,24 @@ def CIR(X, Y, Xt, Yt, a, d):
     Y = pd.DataFrame(Y)
     Yt = pd.DataFrame(Yt)
 
-    # check whether the first column is sequential numbers
-    if X.iloc[:, 0].equals(pd.Series(range(1, len(X) + 1))):
-        X = X.iloc[:, 1:]
-
-    if Xt.iloc[:, 0].equals(pd.Series(range(1, len(Xt) + 1))):
-        Xt = Xt.iloc[:, 1:]
-
-    if Y.iloc[:, 0].equals(pd.Series(range(1, len(Y) + 1))):
-        Y = Y.iloc[:, 1:]
-
-    if Yt.iloc[:, 0].equals(pd.Series(range(1, len(Yt) + 1))):
-        Yt = Yt.iloc[:, 1:]
-
     # n represents the rows of X. p represents the columns of X. m represent the rows of Xt.
     n = len(X)
     p = len(X.columns)
     m = len(Xt)
 
     # Parameter Check
+    if X.iloc[:, 0].equals(pd.Series(range(1, len(X) + 1))):
+        raise ValueError('X should not have an index column')
+
+    if Xt.iloc[:, 0].equals(pd.Series(range(1, len(Xt) + 1))):
+        raise ValueError('Xt should not have an index column')
+
+    if Y.iloc[:, 0].equals(pd.Series(range(1, len(Y) + 1))):
+        raise ValueError('Y should not have an index column')
+
+    if Yt.iloc[:, 0].equals(pd.Series(range(1, len(Yt) + 1))):
+        raise ValueError('Yt should not hav an index column')
+
     if len(Xt.columns) != p:
         raise ValueError('Xt should have the same number of columns as X')
 
@@ -95,18 +94,20 @@ def CIR(X, Y, Xt, Yt, a, d):
             sigma_X += outer_product
 
     sigma_X = np.array(sigma_X)
-    sigma_X = sigma_X + (5*10 ** (-14))*np.identity(p)
-    # eigenvalues, eigenvectors = np.linalg.eigh(sigma_X)
-    # print(eigenvalues)
+    eigenvalues, eigenvectors = np.linalg.eigh(sigma_X)
+    epsilon = 2 * abs(np.min(eigenvalues))
+    sigma_X = sigma_X + epsilon * np.identity(p)
+
     cov_matrix_X = np.array(cov_matrix_X)
 
     # Generalized Eigenvalue Decomposition
     A = cov_matrix_X @ sigma_X @ cov_matrix_X
     B = cov_matrix_X @ cov_matrix_X
     eigenvalues, eigenvectors = eigh(cov_matrix_X, sigma_X)
+    # print(eigenvectors)
 
     if a == 0:
-        v = eigenvectors[:d, :]
+        v = eigenvectors[:, :d]
         f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
         return v, f_v
     # =======================================================================================
@@ -172,7 +173,7 @@ def CIR(X, Y, Xt, Yt, a, d):
     optimizer = RiemannianSGD([v], lr=0.1)
     v = v.to(torch.double)
 
-    for step in range(100000):
+    for step in range(1000):
         optimizer.zero_grad()
         gradient = grad(A, B, a, v, At, Bt)
         proj_grad = stiefel.proju(v, gradient)
@@ -181,7 +182,7 @@ def CIR(X, Y, Xt, Yt, a, d):
         cost = f(A, B, a, v, At, Bt)
         optimizer.step()
 
-    print(v @ v.t())
+    # print(v @ v.t())
 
     # print(v.shape)
 
@@ -229,3 +230,5 @@ def grad(A, B, a, v, At, Bt):
     gradient = -2 * (avb - a * avb_t)
 
     return gradient
+
+    # def stepGenerator():

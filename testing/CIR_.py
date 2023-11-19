@@ -2,9 +2,11 @@ import numpy as np
 import pandas as pd
 from scipy.linalg import eigh
 from scipy.linalg import eig
+from numpy.linalg import norm
 import torch
 import geoopt
 from geoopt.optim import RiemannianSGD
+from geoopt.manifolds import Stiefel
 
 
 def CIR(X, Y, Xt, Yt, a, d):
@@ -18,36 +20,35 @@ def CIR(X, Y, Xt, Yt, a, d):
     p = len(X.columns)
     m = len(Xt)
 
-    # Parameter Check
     if X.iloc[:, 0].equals(pd.Series(range(1, len(X) + 1))):
-        raise ValueError('X should not have an index column')
+        raise ValueError("X should not have an index column")
 
     if Xt.iloc[:, 0].equals(pd.Series(range(1, len(Xt) + 1))):
-        raise ValueError('Xt should not have an index column')
+        raise ValueError("Xt should not have an index column")
 
     if Y.iloc[:, 0].equals(pd.Series(range(1, len(Y) + 1))):
-        raise ValueError('Y should not have an index column')
+        raise ValueError("Y should not have an index column")
 
     if Yt.iloc[:, 0].equals(pd.Series(range(1, len(Yt) + 1))):
-        raise ValueError('Yt should not hav an index column')
+        raise ValueError("Yt should not hav an index column")
 
     if len(Xt.columns) != p:
-        raise ValueError('Xt should have the same number of columns as X')
+        raise ValueError("Xt should have the same number of columns as X")
 
     if len(Y) != n:
-        raise ValueError('Y must have the same number of rows as X')
+        raise ValueError("Y must have the same number of rows as X")
 
     if len(Yt) != m:
-        raise ValueError('Yt must have the same number of rows as Xt')
+        raise ValueError("Yt must have the same number of rows as Xt")
 
     if not isinstance(d, int):
-        raise TypeError('d parameter must be an integer')
+        raise TypeError("d parameter must be an integer")
 
     if d < 1:
-        raise ValueError('d must be greater than or equal to 1')
+        raise ValueError("d must be greater than or equal to 1")
 
     if a < 0:
-        raise ValueError('a must be greater than or equal to 0')
+        raise ValueError("a must be greater than or equal to 0")
 
     # Center the matrix X by subtracting the original matrix X by the column means of X
     col_mean_x = X.mean(axis=0)
@@ -158,66 +159,71 @@ def CIR(X, Y, Xt, Yt, a, d):
             sigma_Xt += outer_product_t
 
     sigma_Xt = np.array(sigma_Xt)
+    eigenvalues_t, eigenvectors_t = np.linalg.eigh(sigma_Xt)
+    epsilon_t = 2 * abs(np.min(eigenvalues_t))
+    sigma_Xt = sigma_Xt + epsilon_t * np.identity(p)
+
     cov_matrix_Xt = np.array(cov_matrix_Xt)
 
     # Generalized Eigenvalue Decomposition
     At = cov_matrix_Xt @ sigma_Xt @ cov_matrix_Xt
     Bt = cov_matrix_Xt @ cov_matrix_Xt
 
+    A = torch.tensor(A, dtype=torch.double)
+    B = torch.tensor(B, dtype=torch.double)
+    a = torch.tensor(a, dtype=torch.double)
+    At = torch.tensor(At, dtype=torch.double)
+    Bt = torch.tensor(Bt, dtype=torch.double)
+
     # Optimization on Manifold
     stiefel = geoopt.manifolds.Stiefel()
-    initial_guess = torch.randn(p, d)
-    initial_guess, _ = torch.linalg.qr(initial_guess)
+    torch.manual_seed(0)
+    initial_point = torch.randn(p, d)
+    initial_point, _ = torch.qr(initial_point)
 
-    v = geoopt.ManifoldParameter(initial_guess, manifold=stiefel)
+    v = geoopt.ManifoldParameter(initial_point, manifold=stiefel)
+    print(v)
+
     optimizer = RiemannianSGD([v], lr=0.1)
-    v = v.to(torch.double)
+    #  nesterov=False, momentum=0.5, dampening=0.1
 
-    for step in range(1000):
+    max_iterations = 2000
+
+    for step in range(max_iterations):
+        vt = v.clone()
         optimizer.zero_grad()
-        gradient = grad(A, B, a, v, At, Bt)
-        proj_grad = stiefel.proju(v, gradient)
-        v.grad = proj_grad
-        # v.manifold.proju(v, gradient)
         cost = f(A, B, a, v, At, Bt)
+        gradient = grad(A, B, a, v, At, Bt).to(torch.float)
+        v.grad = gradient
         optimizer.step()
+        vt_plus = v.clone()
 
+        if stepExit(vt_plus, vt, cost, A, B, At, Bt, a):
+            break
+
+    print(step)
+    print(v)
     # print(v @ v.t())
-
     # print(v.shape)
-
-
 #     return v
 
 
 def f(A, B, a, v, At, Bt):
-    A = torch.tensor(A)
-    B = torch.tensor(B)
-    At = torch.tensor(At)
-    Bt = torch.tensor(Bt)
+    v = v.data
+    v = v.to(torch.double)
 
-    bv_inv = torch.inverse(torch.matmul(torch.matmul(v.t(), B), v))
-    va = torch.matmul(torch.matmul(v.T, A), v)
-    bv_t_inv = torch.inverse(torch.matmul(torch.matmul(v.t(), Bt), v))
-    va_t = torch.matmul(torch.matmul(v.T, At), v)
+    bv_inv = torch.inverse(v.t() @ B @ v)
+    va = v.t() @ A @ v
+    bv_t_inv = torch.inverse(v.t() @ Bt @ v)
+    va_t = v.t() @ At @ v
 
-    f_v = -torch.trace(torch.matmul(va, bv_inv)) + a * \
-        torch.trace(torch.matmul(va_t, bv_t_inv))
-
+    f_v = -torch.trace(va @ bv_inv) + a * torch.trace(va_t @ bv_t_inv)
     return f_v
 
 
 def grad(A, B, a, v, At, Bt):
-    A = torch.tensor(A)
-    B = torch.tensor(B)
-    At = torch.tensor(At)
-    Bt = torch.tensor(Bt)
-
+    v = v.data
     v = v.to(torch.double)
-    A = A.to(torch.double)
-    B = B.to(torch.double)
-    At = At.to(torch.double)
-    Bt = Bt.to(torch.double)
 
     bv_inv = torch.inverse(v.t() @ B @ v)
     va = v.t() @ A @ v
@@ -228,7 +234,22 @@ def grad(A, B, a, v, At, Bt):
     avb_t = At @ v @ bv_t_inv - Bt @ v @ bv_t_inv @ va_t @ bv_t_inv
 
     gradient = -2 * (avb - a * avb_t)
-
     return gradient
 
-    # def stepGenerator():
+
+def stepExit(vt_plus, vt, cost, A, B, At, Bt, a) -> bool:
+    epsilon1 = 0.025
+    epsilon2 = 0.01
+    distance = torch.norm(vt_plus @ vt_plus.t() - vt @ vt.t(), "fro")
+    vt_plus_gradient = grad(A, B, a, vt_plus, At, Bt)
+    cost_vt_plus = f(A, B, a, vt_plus, At, Bt)
+
+    print(torch.norm(cost_vt_plus - cost, "fro"))
+    if distance < epsilon1:
+        return True
+    elif torch.norm(vt_plus_gradient, "fro") < epsilon1:
+        return True
+    elif torch.norm(cost_vt_plus - cost, "fro") < epsilon2:
+        return True
+    else:
+        return False

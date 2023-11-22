@@ -166,7 +166,7 @@ def CIR2(X, Y, Xt, Yt, a, d):
     At = cov_matrix_Xt @ sigma_Xt @ cov_matrix_Xt
     Bt = cov_matrix_Xt @ cov_matrix_Xt
 
-    np.random.seed(0)
+    np.random.seed(2)
     v = np.random.rand(p, d)
     v, r = np.linalg.qr(v)
 
@@ -254,7 +254,6 @@ def SGPM(X, A, B, At, Bt, a):
     Grad = np.zeros((mxitr + 1, 1))
     F_eval[0] = F
     Grad[0] = nrmG
-    i = 1
     for itr in range(0, mxitr):
         XP, FP, dtXP, nrmGP = X, F, dtX, nrmG
 
@@ -371,7 +370,6 @@ def SGPM(X, A, B, At, Bt, a):
                 msg = "converge"
                 break
 
-        i = i + 1
         Qp = Q
         Q = gamma * Qp + 1
         Cval = (gamma * Qp * Cval + F) / Q
@@ -394,5 +392,4 @@ def SGPM(X, A, B, At, Bt, a):
         feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
 
     feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
-    print(i)
     return X

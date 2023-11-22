@@ -8,6 +8,8 @@ import geoopt
 from geoopt.optim import RiemannianSGD
 from geoopt.manifolds import Stiefel
 
+torch.set_printoptions(sci_mode=False)
+
 
 def CIR(X, Y, Xt, Yt, a, d):
     X = pd.DataFrame(X)
@@ -111,7 +113,7 @@ def CIR(X, Y, Xt, Yt, a, d):
         v = eigenvectors[:, :d]
         f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
         return v, f_v
-    # =======================================================================================
+    # =================================================================
     # Background data and the case when a > 0
 
     # Center the data
@@ -177,15 +179,13 @@ def CIR(X, Y, Xt, Yt, a, d):
 
     # Optimization on Manifold
     stiefel = geoopt.manifolds.Stiefel()
-    torch.manual_seed(0)
+    torch.manual_seed(2)
     initial_point = torch.randn(p, d)
-    # make sure initial_point is an orthoganal matrix
     initial_point, _ = torch.linalg.qr(initial_point)
 
     v = geoopt.ManifoldParameter(initial_point, manifold=stiefel)
-    # print(v)
 
-    optimizer = RiemannianSGD([v], lr=1e-1, momentum=0.9)
+    optimizer = RiemannianSGD([v], lr=1e-3, momentum=0.9)
     max_iterations = 10000
 
     for step in range(max_iterations):
@@ -200,8 +200,6 @@ def CIR(X, Y, Xt, Yt, a, d):
         if stepExit(vt_plus, vt, cost, A, B, At, Bt, a):
             break
 
-    # print(step)
-    # print(v)
     torch.set_printoptions(threshold=10_000)
     output = v @ v.t()
     return output
@@ -237,29 +235,18 @@ def grad(A, B, a, v, At, Bt):
 
 
 def stepExit(vt_plus, vt, cost, A, B, At, Bt, a) -> bool:
-    epsilon1 = 1e-6  # 0.025
-    epsilon2 = 1e-4
-    epsilon3 = 1e-12
+    xtol = 1e-6  # 0.025
+    gtol = 1e-4
+    ftol = 1e-12
     distance = torch.norm(vt_plus @ vt_plus.t() - vt @ vt.t(), "fro")
     vt_plus_gradient = grad(A, B, a, vt_plus, At, Bt)
     cost_vt_plus = f(A, B, a, vt_plus, At, Bt)
 
-    # print("distance")
-    # print(distance)
-    # print("gradient")
-    # print(torch.norm(vt_plus_gradient, "fro"))
-    # print("f:...")
-    # print(torch.norm(cost_vt_plus - cost, "fro"))
-    # if distance < epsilon1 and torch.norm(vt_plus_gradient, "fro") < epsilon2 and abs(cost_vt_plus - cost) < epsilon3:
-    #     return True
-    # else:
-    #     return False
-
-    if distance < epsilon1:
+    if distance < xtol:
         return True
-    elif torch.norm(vt_plus_gradient, "fro") < epsilon2:
+    elif torch.norm(vt_plus_gradient, "fro") < gtol:
         return True
-    elif abs(cost_vt_plus - cost) < epsilon3:
+    elif abs(cost_vt_plus - cost) < ftol:
         return True
     else:
         return False

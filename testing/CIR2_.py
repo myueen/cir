@@ -167,9 +167,12 @@ def CIR2(X, Y, Xt, Yt, a, d):
     Bt = cov_matrix_Xt @ cov_matrix_Xt
 
     np.random.seed(0)
-    v = np.random.normal(size=(p, d))
+    v = np.random.rand(p, d)
+    v, r = np.linalg.qr(v)
+
     output = SGPM(v, A, B, At, Bt, a)
-    # return output @ np.transpose(output)
+    # return output
+    return output @ np.transpose(output)
 
 
 def f(A, B, a, v, At, Bt):
@@ -210,9 +213,9 @@ def SGPM(X, A, B, At, Bt, a):
     mxitr = 1000
     alpha = 0.85
     record = 0
-    projG = 1
+    projG = 2
     iscomplex = 0
-    crit = np.ones((nt, 3))
+    crit = np.ones((mxitr, 3))
     invH = True
 
     if k < n/2:
@@ -224,8 +227,6 @@ def SGPM(X, A, B, At, Bt, a):
     F = f(A, B, a, X, At, Bt)
     G = grad(A, B, a, X, At, Bt)
 
-    out = {}
-    out['nfe'] = 1
     GX = np.transpose(G) @ X
 
     if invH:
@@ -253,7 +254,7 @@ def SGPM(X, A, B, At, Bt, a):
     Grad = np.zeros((mxitr + 1, 1))
     F_eval[0] = F
     Grad[0] = nrmG
-
+    i = 1
     for itr in range(0, mxitr):
         XP, FP, dtXP, nrmGP = X, F, dtX, nrmG
 
@@ -270,7 +271,7 @@ def SGPM(X, A, B, At, Bt, a):
                     A = np.eye(n) + (tau * 0.5) * H
                     X = solve(
                         A, XP - (0.5 * tau) * dtXP, lower=False)
-                elif abs(alpha - 1) > rho:  # Implicit EuLer
+                elif abs(alpha - 1) < rho:  # Implicit EuLer
                     A = np.eye(n) + tau * H
                     X = solve(A, XP, lower=False)
                 else:  # Convex Combination
@@ -304,7 +305,8 @@ def SGPM(X, A, B, At, Bt, a):
 
         GX = np.transpose(G) @ X
         dtX = G - X @ GX
-        nrmG = np.linalg.norm(dtX, 'fro')
+        nrmG = np.linalg.norm(dtX, ord='fro')
+
         F_eval[itr+1] = F
         # print(Grad)
         Grad[itr+1] = nrmG
@@ -354,41 +356,43 @@ def SGPM(X, A, B, At, Bt, a):
         # Stopping Rules
         crit[itr, :] = [nrmG, XDiff, FDiff]
 
-        mcrit = np.mean(crit[(itr - min(nt, itr) + 1):itr, :], axis=0)
+        mcrit = np.mean(crit[max(0, itr-nt+1):itr, :], axis=0)
+        # mcrit = np.mean(crit[itr - min(nt, itr) + 1:itr, :], axis=0)
+        # print("Iteration:", itr)
+        # print("size of crit", crit.shape)
+        # print("size of mcrit", mcrit.shape)
 
-        if (XDiff < xtol and FDiff < ftol) or nrmG < gtol or all(mcrit[1:3] < 10 * np.array([xtol, ftol])):
+        if (XDiff < xtol and FDiff < ftol) or nrmG < gtol or all(mcrit[1:3] < 10 * np.hstack((xtol, ftol))):
             if itr <= 2:
                 ftol = 0.1 * ftol
                 xtol = 0.1 * xtol
                 gtol = 0.1 * gtol
             else:
-                # out["msg"] = "converge"
+                msg = "converge"
                 break
 
+        i = i + 1
         Qp = Q
         Q = gamma * Qp + 1
         Cval = (gamma * Qp * Cval + F) / Q
 
-        F_eval = F_eval[0:itr, 0]
-        Grad = Grad[0:itr, 0]
+    F_eval = F_eval[0:itr, 0]
+    Grad = Grad[0:itr, 0]
 
-        if itr >= mxitr:
-            out["msg"] = "exceed max iteration"
+    if itr >= mxitr:
+        msg = "exceed max iteration"
 
-        feasi = np.linalg.norm(np.transpose(X) @ X - np.eye(k), 'fro')
+    feasi = np.linalg.norm(np.transpose(X) @ X - np.eye(k), 'fro')
 
-        if feasi > 1e-13:
-            L = np.linalg.cholesky(X.T @ X)
-            X = X @ np.linalg.inv(L)
-            F = f(A, B, a, X, At, Bt)
-            G = grad(A, B, a, X, At, Bt)
-            dtX = G - X @ GX
-            nrmG = np.linalg.norm(dtX, 'fro')
-            feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
-
+    if feasi > 1e-13:
+        L = np.linalg.cholesky(X.T @ X)
+        X = X @ np.linalg.inv(L)
+        F = f(A, B, a, X, At, Bt)
+        G = grad(A, B, a, X, At, Bt)
+        dtX = G - X @ GX
+        nrmG = np.linalg.norm(dtX, 'fro')
         feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
-        out["nrmG"] = nrmG
-        out["fval"] = F
-        out["itr"] = itr
 
+    feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
+    print(i)
     return X

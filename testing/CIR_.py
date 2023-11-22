@@ -8,8 +8,6 @@ import geoopt
 from geoopt.optim import RiemannianSGD
 from geoopt.manifolds import Stiefel
 
-torch.set_printoptions(sci_mode=False)
-
 
 def CIR(X, Y, Xt, Yt, a, d):
     X = pd.DataFrame(X)
@@ -200,7 +198,6 @@ def CIR(X, Y, Xt, Yt, a, d):
         if stepExit(vt_plus, vt, cost, A, B, At, Bt, a):
             break
 
-    torch.set_printoptions(threshold=10_000)
     output = v @ v.t()
     return output
 

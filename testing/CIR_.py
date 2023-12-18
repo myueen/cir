@@ -33,7 +33,7 @@ def CIR(X, Y, Xt, Yt, a, d, opt_option):
         raise ValueError("Y should not have an index column")
 
     if Yt.iloc[:, 0].equals(pd.Series(range(1, len(Yt) + 1))):
-        raise ValueError("Yt should not hav an index column")
+        raise ValueError("Yt should not have an index column")
 
     if len(Xt.columns) != p:
         raise ValueError("Xt should have the same number of columns as X")
@@ -249,8 +249,8 @@ def stepExit(vt_plus, vt, cost, A, B, At, Bt, a) -> bool:
     gtol = 1e-4
     ftol = 1e-12
     distance = torch.norm(vt_plus @ vt_plus.t() - vt @ vt.t(), 'fro')
-    vt_plus_gradient = grad(A, B, a, vt_plus, At, Bt)
-    cost_vt_plus = f(A, B, a, vt_plus, At, Bt)
+    vt_plus_gradient = grad_geoopt(A, B, a, vt_plus, At, Bt)
+    cost_vt_plus = f_geoopt(A, B, a, vt_plus, At, Bt)
 
     if distance < xtol:
         return True

@@ -15,7 +15,7 @@
 # max_iterations = 2
 
 # for step in range(max_iterations):
-#     vt = v.clone()
+#     vt = v.clone(
 #     optimizer.zero_grad()
 #     cost = f(A, B, a, v, At, Bt)
 #     gradient = grad(A, B, a, v, At, Bt).to(torch.float)

@@ -187,7 +187,8 @@ def CIR(X, Y, Xt, Yt, a, d, opt_option):
 
         v = geoopt.ManifoldParameter(initial_point, manifold=stiefel)
 
-        optimizer = RiemannianSGD([v], lr=1e-3, momentum=0.9)
+        optimizer = RiemannianSGD([v], lr=0.1, momentum=0.9)
+        # optimizer = RiemannianSGD([v], lr=1e-3, momentum=0.9)
         max_iterations = 10000
 
         for step in range(max_iterations):
@@ -479,4 +480,5 @@ def SGPM(X, A, B, At, Bt, a):
         feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
 
     feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
+    print("This is objective function: ", F)
     return X

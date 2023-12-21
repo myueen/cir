@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import math
+import time
 import sliced
 from sliced import base
 from sliced.base import slice_y, grouped_sum, unique_counts
@@ -337,25 +338,24 @@ def stepExit(vt_plus, vt, cost, A, B, At, Bt, a) -> bool:
         return False
 
 
-def f(A, B, a, v, At, Bt):
-    bv_inv = np.linalg.inv(np.transpose(v) @ B @ v)
+def f(A, B, alpha, v, At, Bt):
+    bv = np.linalg.inv(np.transpose(v) @ B @ v)
     va = np.transpose(v) @ A @ v
-    bv_t_inv = np.linalg.inv(np.transpose(v) @ Bt @ v)
+    bv_t = np.linalg.inv(np.transpose(v) @ Bt @ v)
     va_t = np.transpose(v) @ At @ v
-    f_v = -np.matrix.trace(va @ bv_inv) + a * np.matrix.trace(va_t @ bv_t_inv)
+
+    f_v = -np.matrix.trace(va @ bv) + alpha * np.matrix.trace(va_t @ bv_t)
     return f_v
 
 
-def grad(A, B, a, v, At, Bt):
-    bv_inv = np.linalg.inv(np.transpose(v) @ B @ v)
+def grad(A, B, alpha, v, At, Bt):
+    bv = np.linalg.inv(np.transpose(v) @ B @ v)
     va = np.transpose(v) @ A @ v
-    bv_t_inv = np.linalg.inv(np.transpose(v) @ Bt @ v)
+    bv_t = np.linalg.inv(np.transpose(v) @ Bt @ v)
     va_t = np.transpose(v) @ At @ v
 
-    avb = A @ v @ bv_inv - B @ v @ bv_inv @ va @ bv_inv
-    avb_t = At @ v @ bv_t_inv - Bt @ v @ bv_t_inv @ va_t @ bv_t_inv
-
-    gradient = -2 * (avb - a * avb_t)
+    gradient = -2 * (A @ v @ bv - B @ v @ bv @ va @ bv -
+                     alpha * (At @ v @ bv_t - Bt @ v @ bv_t @ va_t @ bv_t))
     return gradient
 
 
@@ -363,16 +363,16 @@ def SGPM(X, A, B, At, Bt, a):
     X = np.array(X)
     n, k = X.shape
 
-    xtol = 1e-6
-    gtol = 1e-4
-    ftol = 1e-12
+    xtol = 1e-20
+    gtol = 1e-5
+    ftol = 1e-20
     rho = 1e-4
-    eta = 0.1
+    eta = 0.2
     gamma = 0.85
     tau = 1e-3
     STPEPS = 1e-10
     nt = 5
-    mxitr = 1000
+    mxitr = 3000
     alpha = 0.85
     record = 0
     projG = 1
@@ -382,18 +382,19 @@ def SGPM(X, A, B, At, Bt, a):
 
     if k < n/2:
         invH = False
-        eye2k = np.identity(2 * k)
+        eye2k = np.eye(2 * k)
 
     # Initial function value and gradient
     # Prepare for iterations
     F = f(A, B, a, X, At, Bt)
     G = grad(A, B, a, X, At, Bt)
+    nfe = 1
 
     GX = np.transpose(G) @ X
 
     if invH:
         GXT = G @ np.transpose(X)
-        H = GXT - np.transpose(GXT)
+        H = (GXT - np.transpose(GXT))
     else:
         if projG == 1:
             U = np.hstack((G, X))
@@ -411,13 +412,24 @@ def SGPM(X, A, B, At, Bt, a):
     Q = 1
     Cval = F
 
+    if record == 1:
+        fid = 1
+        print(fid, '----------- Scaled Gradient Projection Method with Line search ----------- \n')
+        print(fid, '%4s %8s %8s %10s %10s\n',
+              'Iter', 'tau', 'F(X)', 'nrmG', 'XDiff')
+
     # main iteration
-    F_eval = np.zeros((mxitr + 1, 1))
-    Grad = np.zeros((mxitr + 1, 1))
+    F_eval = np.zeros((mxitr + 2, 1))
+    Grad = np.zeros((mxitr + 2, 1))
     F_eval[0] = F
     Grad[0] = nrmG
-    for itr in range(0, mxitr):
-        XP, FP, dtXP, nrmGP = X, F, dtX, nrmG
+
+    start_time = time.time()
+    for itr in np.arange(1, mxitr+1).reshape(-1):
+        XP = X
+        FP = F
+        dtXP = dtX
+        nrmGP = nrmG
 
         # scale step size
         nls = 1
@@ -429,22 +441,17 @@ def SGPM(X, A, B, At, Bt, a):
                 if abs(alpha) < rho:    # Explicit Euler (Steepest Descent)
                     X = XP - tau * dtXP
                 elif abs(alpha - 0.5) < rho:  # Crank-Nicolson
-                    A = np.eye(n) + (tau * 0.5) * H
-                    X = solve(
-                        A, XP - (0.5 * tau) * dtXP, lower=False)
+                    X = solve(np.eye(n) + (tau * 0.5) * H, XP -
+                              (0.5 * tau) * dtXP, lower=False)
                 elif abs(alpha - 1) < rho:  # Implicit EuLer
-                    A = np.eye(n) + tau * H
-                    X = solve(A, XP, lower=False)
+                    X = solve(np.eye(n) + tau * H, XP, lower=False)
                 else:  # Convex Combination
-                    A = np.eye(n) + (tau * alpha) * H
-                    X = solve(
-                        A, XP - ((1 - alpha) * tau) * dtXP, lower=False)
+                    X = solve(np.eye(n) + (tau * alpha) * H, XP -
+                              ((1 - alpha) * tau) * dtXP, lower=False)
 
                 if abs(alpha - 0.5) > rho:
                     XtX = np.transpose(X) @ X
-                    # potentilaly lower????
                     L = cholesky(XtX, lower=False)
-                    # X = np.linalg.inv(L) @ X
                     X = X @ np.linalg.inv(L)
 
             else:
@@ -459,12 +466,13 @@ def SGPM(X, A, B, At, Bt, a):
             # calculate G, F
             F = f(A, B, a, X, At, Bt)
             G = grad(A, B, a, X, At, Bt)
+            nfe = nfe + 1
 
             if F <= Cval - tau * deriv or nls >= 5:
                 break
 
             tau = eta * tau
-            nls += 1
+            nls = nls + 1
 
         GX = np.transpose(G) @ X
         dtX = G - X @ GX
@@ -501,7 +509,7 @@ def SGPM(X, A, B, At, Bt, a):
         S = X - XP
         SS = np.sum(np.sum(np.multiply(S, S), axis=1), axis=0)
 
-        XDiff = math.sqrt(SS / n)
+        XDiff = math.sqrt(SS * (1/n))
         FDiff = abs(FP - F) / (abs(FP) + 1)
 
         Y = dtX - dtXP
@@ -518,7 +526,6 @@ def SGPM(X, A, B, At, Bt, a):
         # Stopping Rules
         crit[itr % nt, :] = [nrmG, XDiff, FDiff]
         mcrit = np.mean(crit[max(0, itr-nt+1):itr, :], axis=0)
-        # mcrit = np.mean(crit[itr - min(nt, itr) + 1:itr, :], axis=0)
 
         if (XDiff < xtol and FDiff < ftol) or nrmG < gtol or all(mcrit[1:3] < 10 * np.hstack((xtol, ftol))):
             if itr <= 2:
@@ -532,6 +539,8 @@ def SGPM(X, A, B, At, Bt, a):
         Qp = Q
         Q = gamma * Qp + 1
         Cval = (gamma * Qp * Cval + F) / Q
+
+    end_time = time.time()
 
     F_eval = F_eval[0:itr, 0]
     Grad = Grad[0:itr, 0]
@@ -550,6 +559,14 @@ def SGPM(X, A, B, At, Bt, a):
         nrmG = np.linalg.norm(dtX, 'fro')
         feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
 
-    feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
-    print("This is objective function: ", F)
+    print('---------------------------------------------------\n')
+    print('Results for Scaled Gradient Projection Method \n')
+    print('---------------------------------------------------\n')
+    print('   Obj. function = %7.6e\n' % (-2*F))
+    print('   Gradient norm = %7.6e \n' % nrmG)
+    print('   ||X^T*X-I||_F = %3.2e\n' %
+          np.linalg.norm(X.T @ X - np.eye(k), 'fro'))
+    print('   Iteration number = %d\n' % itr)
+    print('   Cpu time (secs) = %3.4f\n' % (end_time - start_time))
+    print('   Number of evaluation(Obj. func) = %d\n' % nfe)
     return X

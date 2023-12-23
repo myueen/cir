@@ -230,51 +230,51 @@ def CIR(X, Y, Xt, Yt, alpha, d):
     # return output @ np.transpose(output)
 
 
-def f_geoopt(A, B, a, v, At, Bt):
-    v = v.data
-    v = v.to(torch.double)
+# def f_geoopt(A, B, a, v, At, Bt):
+#     v = v.data
+#     v = v.to(torch.double)
 
-    bv_inv = torch.inverse(v.t() @ B @ v)
-    va = v.t() @ A @ v
-    bv_t_inv = torch.inverse(v.t() @ Bt @ v)
-    va_t = v.t() @ At @ v
+#     bv_inv = torch.inverse(v.t() @ B @ v)
+#     va = v.t() @ A @ v
+#     bv_t_inv = torch.inverse(v.t() @ Bt @ v)
+#     va_t = v.t() @ At @ v
 
-    f_v = -torch.trace(va @ bv_inv) + a * torch.trace(va_t @ bv_t_inv)
-    return f_v
-
-
-def grad_geoopt(A, B, a, v, At, Bt):
-    v = v.data
-    v = v.to(torch.double)
-
-    bv_inv = torch.inverse(v.t() @ B @ v)
-    va = v.t() @ A @ v
-    bv_t_inv = torch.inverse(v.t() @ Bt @ v)
-    va_t = v.t() @ At @ v
-
-    avb = A @ v @ bv_inv - B @ v @ bv_inv @ va @ bv_inv
-    avb_t = At @ v @ bv_t_inv - Bt @ v @ bv_t_inv @ va_t @ bv_t_inv
-
-    gradient = -2 * (avb - a * avb_t)
-    return gradient
+#     f_v = -torch.trace(va @ bv_inv) + a * torch.trace(va_t @ bv_t_inv)
+#     return f_v
 
 
-def stepExit(vt_plus, vt, cost, A, B, At, Bt, a) -> bool:
-    xtol = 1e-6
-    gtol = 1e-4
-    ftol = 1e-12
-    distance = torch.norm(vt_plus @ vt_plus.t() - vt @ vt.t(), 'fro')
-    vt_plus_gradient = grad_geoopt(A, B, a, vt_plus, At, Bt)
-    cost_vt_plus = f_geoopt(A, B, a, vt_plus, At, Bt)
+# def grad_geoopt(A, B, a, v, At, Bt):
+#     v = v.data
+#     v = v.to(torch.double)
 
-    if distance < xtol:
-        return True
-    elif torch.norm(vt_plus_gradient, 'fro') < gtol:
-        return True
-    elif abs(cost_vt_plus - cost) < ftol:
-        return True
-    else:
-        return False
+#     bv_inv = torch.inverse(v.t() @ B @ v)
+#     va = v.t() @ A @ v
+#     bv_t_inv = torch.inverse(v.t() @ Bt @ v)
+#     va_t = v.t() @ At @ v
+
+#     avb = A @ v @ bv_inv - B @ v @ bv_inv @ va @ bv_inv
+#     avb_t = At @ v @ bv_t_inv - Bt @ v @ bv_t_inv @ va_t @ bv_t_inv
+
+#     gradient = -2 * (avb - a * avb_t)
+#     return gradient
+
+
+# def stepExit(vt_plus, vt, cost, A, B, At, Bt, a) -> bool:
+#     xtol = 1e-6
+#     gtol = 1e-4
+#     ftol = 1e-12
+#     distance = torch.norm(vt_plus @ vt_plus.t() - vt @ vt.t(), 'fro')
+#     vt_plus_gradient = grad_geoopt(A, B, a, vt_plus, At, Bt)
+#     cost_vt_plus = f_geoopt(A, B, a, vt_plus, At, Bt)
+
+#     if distance < xtol:
+#         return True
+#     elif torch.norm(vt_plus_gradient, 'fro') < gtol:
+#         return True
+#     elif abs(cost_vt_plus - cost) < ftol:
+#         return True
+#     else:
+    # return False
 
 
 def f(A, B, alpha, v, At, Bt):
@@ -288,23 +288,9 @@ def f(A, B, alpha, v, At, Bt):
 
 
 def grad(A, B, alpha, v, At, Bt):
-    gradient = -2 * (A @ v @ scipy.linalg.inv(v.conj().T @ B @ v)) + 2 * (B @ v @ scipy.linalg.inv(v.conj().T @ B @ v) @ v.conj().T @ A @ v @ scipy.linalg.inv(v.conj().T @ B @ v)) + 2 * alpha * (At @ v @ scipy.linalg.inv(v.conj().T @ Bt @ v)) - 2 * alpha * (Bt @ v @ scipy.linalg.inv(
-        v.conj().T @ Bt @ v) @ v.conj().T @ At @ v @ scipy.linalg.inv(v.conj().T @ Bt @ v))
-
-    # gradient = -2 * (A @ v @ np.linalg.inv(v.conj().T @ B @ v)) + 2 * (B @ v @ np.linalg.inv(v.conj().T @ B @ v) @ v.conj().T @ A @ v @ np.linalg.inv(v.conj().T @ B @ v)) + 2 * alpha * (At @ v @ np.linalg.inv(v.conj().T @ Bt @ v)) - 2 * alpha * (Bt @ v @ np.linalg.inv(
-    #     v.conj().T @ Bt @ v) @ v.conj().T @ At @ v @ np.linalg.inv(v.conj().T @ Bt @ v))
-    # gradient = -2 * (A @ v @ np.linalg.inv(v.T @ B @ v)) + 2 * (B @ v @ np.linalg.inv(v.T @ B @ v) @ v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)) + 2 * \
-    #     alpha * At @ v @ np.linalg.inv(v.T @ Bt @ v) - 2 * alpha * Bt @ v @ np.linalg.inv(
-    #         v.T @ Bt @ v) @ v.T @ At @ v @ np.linalg.inv(v.T @ Bt @ v)
-
-    # bv = np.linalg.inv(np.transpose(v) @ B @ v)
-    # va = np.transpose(v) @ A @ v
-    # bv_t = np.linalg.inv(np.transpose(v) @ Bt @ v)
-    # va_t = np.transpose(v) @ At @ v
-
-    # gradient = -2 * (A @ v @ bv - B @ v @ bv @ va @ bv -
-    #                  alpha * (At @ v @ bv_t - Bt @ v @ bv_t @ va_t @ bv_t))
-
+    gradient = -2 * (A @ v @ scipy.linalg.inv(v.T @ B @ v)) + 2 * (B @ v @ scipy.linalg.inv(v.T @ B @ v) @ v.conj().T @ A @ v @ scipy.linalg.inv(v.T @ B @ v)) + 2 * \
+        alpha * (At @ v @ scipy.linalg.inv(v.T @ Bt @ v)) - 2 * alpha * (Bt @ v @
+                                                                         scipy.linalg.inv(v.T @ Bt @ v) @ v.conj().T @ At @ v @ scipy.linalg.inv(v.T @ Bt @ v))
     return gradient
 
 
@@ -338,9 +324,6 @@ def SGPM(X, A, B, At, Bt, a):
     F = f(A, B, a, X, At, Bt)
     G = grad(A, B, a, X, At, Bt)
     nfe = 1
-
-    # print("This is G")
-    # print(G)
 
     GX = np.transpose(G) @ X
 

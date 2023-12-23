@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import math
 import time
+import scipy
 import sliced
 from sliced import base
 from sliced.base import slice_y, grouped_sum, unique_counts
@@ -16,7 +17,7 @@ from scipy.linalg import solve
 from scipy.linalg import cholesky
 
 
-def CIR(X, Y, Xt, Yt, alpha, d, opt_option):
+def CIR(X, Y, Xt, Yt, alpha, d):
     """Apply contrastive inverse regression dimension reduction on X.
 
     Parameters
@@ -45,35 +46,26 @@ def CIR(X, Y, Xt, Yt, alpha, d, opt_option):
     -------
 
 
-    ## Dependencies 
-    This project relies on the following external packages: 
-    - [sliced](github.com/joshloyal/sliced) by Joshya Loyal 
-
     """
+    X = np.array(X)
+    Xt = np.array(Xt)
+    Y = np.array(Y)
+    Yt = np.array(Yt)
 
-    X = pd.DataFrame(X)
-    Xt = pd.DataFrame(Xt)
-    Y = pd.DataFrame(Y)
-    Yt = pd.DataFrame(Yt)
-
-    # n represents # of observation of foreground
-    # p represents # of features of foreground
-    # m represents # of observation of background
-    # k represents # of features of background
     n, p = X.shape
     m, k = Xt.shape
 
-    if X.iloc[:, 0].equals(pd.Series(range(1, len(X) + 1))):
-        raise ValueError("X should not have an index column")
+    # if np.array_equal(X[:, 0], np.arange(1, len(X) + 1)):
+    #     raise ValueError("X should not have an index column")
 
-    if Xt.iloc[:, 0].equals(pd.Series(range(1, len(Xt) + 1))):
-        raise ValueError("Xt should not have an index column")
+    # if np.array_equal(Xt[:, 0], np.arange(1, len(Xt) + 1)):
+    #     raise ValueError("Xt should not have an index column")
 
-    if Y.iloc[:, 0].equals(pd.Series(range(1, len(Y) + 1))):
-        raise ValueError("Y should not have an index column")
+    # if np.array_equal(Y[:, 0], np.arange(1, len(Y) + 1)):
+    #     raise ValueError("Y should not have an index column")
 
-    if Yt.iloc[:, 0].equals(pd.Series(range(1, len(Yt) + 1))):
-        raise ValueError("Yt should not have an index column")
+    # if np.array_equal(Yt[:, 0], np.arange(1, len(Yt) + 1)):
+    #     raise ValueError("Yt should not have an index column")
 
     if k != p:
         raise ValueError("Xt should have the same number of columns as X")
@@ -96,199 +88,146 @@ def CIR(X, Y, Xt, Yt, alpha, d, opt_option):
     # Center the matrix X by subtracting the original matrix X by the column means of X
     X = X - np.mean(X, axis=0)
 
-    # Covariance matrix
-    cov_X = X.cov()
+    # Covariance matrix of foreground X
+    cov_X = X.T @ X / n
 
     # Define H, which represents the # of intervals I that splits range(Y)
-    Y_unique_value = Y.nunique().item()
-    if Y_unique_value == 2:
+    Y_unique = np.unique(Y)
+    Y_unique_length = len(Y_unique)          # num of unique values in Y
+
+    if Y_unique_length == 2:
         H = 2                       # number of slices
-    elif 2 < Y_unique_value <= 10:
-        H = Y_unique_value
+    elif 2 < Y_unique_length <= 10:
+        H = Y_unique_length
     else:
         if d <= 2:
             H = 10
         else:
             H = 4
 
-    # Count the of ocurrence of y in each H interval
-    unique_y_vals_F, counts_F = unique_counts(Y)
-    cumsum_y_F = np.cumsum(counts_F)
-    n_y_values_F = unique_y_vals_F.shape[0]
-
-    if H >= n_y_values_F:
-        if H > n_y_values_F:
-            warnings.warn(
-                "n_slices greater than the number of unique y values.")
-
-        slice_partition_F = np.hstack((0, cumsum_y_F))
-    else:
-        n_obs_F = np.floor(Y.shape[0] / H)
-        n_samples_seen_F = 0
-        slice_partition_F = [0]  # index in y of start of a new slice
-        while n_samples_seen_F < Y.shape[0] - 2:
-            slice_start_F = np.where(
-                cumsum_y_F >= n_samples_seen_F + n_obs_F)[0]
-            if slice_start_F.shape[0] == 0:  # this means we've reached the end
-                slice_start_F = cumsum_y_F.shape[0] - 1
-            else:
-                slice_start_F = slice_start_F[0]
-
-            n_samples_seen_F = cumsum_y_F[slice_start_F]
-            slice_partition_F.append(n_samples_seen_F)
-
-    slice_indicator_F = np.ones(Y.shape[0], dtype=int)
-
-    for j, (start_idx, end_idx) in enumerate(zip(slice_partition_F, slice_partition_F[1:])):
-        if j == len(slice_partition_F) - 2:
-            slice_indicator_F[start_idx:] = j
-        else:
-            slice_indicator_F[start_idx:end_idx] = j
-
-    slice_counts_F = np.bincount(slice_indicator_F)
-
-    # Define Sigma X
-    Q, R = qr(X, mode='economic')
-    Z = np.sqrt(n) * Q
-    Y = Y.to_numpy()
-    sorted_indices = np.argsort(Y, axis=0, kind='stable')
-    Z = Z[sorted_indices, :]
-    Z = np.squeeze(Z)
-
-    M_means = grouped_sum(Z, slice_indicator_F) / \
-        np.sqrt(slice_counts_F.reshape(-1, 1))
-
-    sigma_X = np.dot(M_means.T, M_means) / n
-
-    eigenvalues, eigenvectors = np.linalg.eigh(sigma_X)
-    epsilon = 2 * abs(np.min(eigenvalues))
-    sigma_X = sigma_X + epsilon * np.identity(p)
-
-    cov_X = np.array(cov_X)
+    # Cov(E[X|Y])
+    sigma_X = np.zeros((p, p))
+    for l in range(H):
+        idx = np.where(Y == Y_unique[l])[0]       # index where Y occur
+        X_select = X[idx, :]            # selected corresponding X rows
+        num_r = X_select.shape[0]       # num of rows in the selected X
+        outer_product = np.outer(np.mean(X_select, axis=0) - np.mean(
+            X, axis=0), np.mean(X_select, axis=0) - np.mean(X, axis=0)) * num_r
+        sigma_X += outer_product
+    sigma_X = sigma_X/n
 
     # Generalized Eigenvalue Decomposition
     A = cov_X @ sigma_X @ cov_X
     B = cov_X @ cov_X
-    eigenvalues, eigenvectors = eigh(cov_X, sigma_X)
 
     if alpha == 0:
+        eigenvalues, eigenvectors = np.linalg.eigh(sigma_X)
+        epsilon = 2 * abs(np.min(eigenvalues))
+        sigma_X = sigma_X + epsilon * np.identity(p)
+        eigenvalues, eigenvectors = eigh(cov_X, sigma_X)
+
+        cov_X = np.array(cov_X)
         v = eigenvectors[:, :d]
         f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
         return v, f_v
 
     # --------The following is for background data and the caase when a > 0-------
     # Center the data
+
     Xt = Xt - np.mean(Xt, axis=0)
 
-    # Covariance matrix
-    cov_Xt = Xt.cov()
+    # Covariance matrix of background Xt
+    cov_Xt = Xt.T @ Xt / m
 
     # Define Ht, which represents the # of interval I that splits range(Yt)
-    Yt_unique_value = Yt.nunique().item()
-    if Yt_unique_value == 2:
+    Yt_unique = np.unique(Yt)
+    Yt_unique_length = len(Yt_unique)  # num of unique values in Yt
+    if Yt_unique_length == 2:
         Ht = 2
-    elif 2 < Yt_unique_value <= 10:
-        Ht = Yt_unique_value
+    elif 2 < Yt_unique_length <= 10:
+        Ht = Yt_unique_length
     else:
         if d <= 2:
             Ht = 10
         else:
             Ht = 4
 
-    # Count the of ocurrence of y in each H intervaL
-    unique_y_vals_B, counts_B = unique_counts(Yt)
-    cumsum_y_B = np.cumsum(counts_B)
-    n_y_values_B = unique_y_vals_B.shape[0]
+    sigma_Xt = np.zeros((k, k))
+    for l in range(Ht):
+        idx = np.where(Yt == Yt_unique[l])[0]       # index where Y occur
+        Xt_select = Xt[idx, :]            # selected corresponding X rows
+        num_r = Xt_select.shape[0]       # num of rows in the selected X
+        outer_product = np.outer(np.mean(Xt_select, axis=0) - np.mean(
+            Xt, axis=0), np.mean(Xt_select, axis=0) - np.mean(Xt, axis=0)) * num_r
+        sigma_Xt += outer_product
 
-    if Ht >= n_y_values_B:
-        if Ht > n_y_values_B:
-            warnings.warn(
-                "n_slices greater than the number of unique y values.")
-
-        slice_partition_B = np.hstack((0, cumsum_y_B))
-    else:
-        n_obs_B = np.floor(Yt.shape[0] / Ht)
-        n_samples_seen_B = 0
-        slice_partition_B = [0]  # index in y of start of a new slice
-        while n_samples_seen_B < Yt.shape[0] - 2:
-            slice_start_B = np.where(
-                cumsum_y_B >= n_samples_seen_B + n_obs_B)[0]
-            if slice_start_B.shape[0] == 0:  # this means we've reached the end
-                slice_start_B = cumsum_y_B.shape[0] - 1
-            else:
-                slice_start_B = slice_start_B[0]
-
-            n_samples_seen_B = cumsum_y_B[slice_start_B]
-            slice_partition_B.append(n_samples_seen_B)
-
-    slice_indicator_B = np.ones(Yt.shape[0], dtype=int)
-    for j, (start_idx, end_idx) in enumerate(zip(slice_partition_B, slice_partition_B[1:])):
-        if j == len(slice_partition_B) - 2:
-            slice_indicator_B[start_idx:] = j
-        else:
-            slice_indicator_B[start_idx:end_idx] = j
-
-    slice_counts_B = np.bincount(slice_indicator_B)
-
-    # Define Sigma X
-    Qt, Rt = qr(Xt, mode='economic')
-    Zt = np.sqrt(m) * Qt
-    Yt = Yt.to_numpy()
-    sorted_indices_t = np.argsort(Yt, axis=0, kind='stable')
-    Zt = Zt[sorted_indices_t, :]
-    Zt = np.squeeze(Zt)
-    Mt_means = grouped_sum(Zt, slice_indicator_B) / \
-        np.sqrt(slice_counts_B.reshape(-1, 1))
-
-    sigma_Xt = np.dot(Mt_means.T, Mt_means) / m
-
-    cov_Xt = np.array(cov_Xt)
+    sigma_Xt = sigma_Xt/m
 
     At = cov_Xt @ sigma_Xt @ cov_Xt
     Bt = cov_Xt @ cov_Xt
 
     # Optimization Algorithm on Stiefel Manifold
-    if opt_option == "geoopt":
-        A = torch.tensor(A, dtype=torch.double)
-        B = torch.tensor(B, dtype=torch.double)
-        alpha = torch.tensor(alpha, dtype=torch.double)
-        At = torch.tensor(At, dtype=torch.double)
-        Bt = torch.tensor(Bt, dtype=torch.double)
+    # if opt_option == "geoopt":
+    #     A = torch.tensor(A, dtype=torch.double)
+    #     B = torch.tensor(B, dtype=torch.double)
+    #     alpha = torch.tensor(alpha, dtype=torch.double)
+    #     At = torch.tensor(At, dtype=torch.double)
+    #     Bt = torch.tensor(Bt, dtype=torch.double)
 
-        stiefel = geoopt.manifolds.Stiefel()
-        torch.manual_seed(1)
-        initial_point = torch.randn(p, d)
-        initial_point, _ = torch.linalg.qr(initial_point)
+    #     stiefel = geoopt.manifolds.Stiefel()
+    #     torch.manual_seed(1)
+    #     initial_point = torch.randn(p, d)
+    #     initial_point, _ = torch.linalg.qr(initial_point)
 
-        v = geoopt.ManifoldParameter(initial_point, manifold=stiefel)
+    #     v = geoopt.ManifoldParameter(initial_point, manifold=stiefel)
 
-        optimizer = RiemannianSGD([v], lr=1e-3, momentum=0.9)
-        max_iterations = 50000
+    #     optimizer = RiemannianSGD([v], lr=1e-3, momentum=0.9)
+    #     max_iterations = 50000
 
-        for step in range(max_iterations):
-            vt = v.clone()
-            optimizer.zero_grad()
-            cost = f_geoopt(A, B, alpha, v, At, Bt)
-            gradient = grad_geoopt(A, B, alpha, v, At, Bt).to(torch.float)
-            v.grad = gradient
-            print(v.grad)
-            optimizer.step()
-            vt_plus = v.clone()
+    #     for step in range(max_iterations):
+    #         vt = v.clone()
+    #         optimizer.zero_grad()
+    #         cost = f_geoopt(A, B, alpha, v, At, Bt)
+    #         gradient = grad_geoopt(A, B, alpha, v, At, Bt).to(torch.float)
+    #         v.grad = gradient
+    #         print(v.grad)
+    #         optimizer.step()
+    #         vt_plus = v.clone()
 
-            if stepExit(vt_plus, vt, cost, A, B, At, Bt, alpha):
-                break
+    #         if stepExit(vt_plus, vt, cost, A, B, At, Bt, alpha):
+    #             break
 
-        output = v @ v.t()
-        return output
+    #     output = v @ v.t()
+    #     return output
 
     # Use SGPM (Scaled Gradient Projection Method for Minimization over the Stiefel Manifold)
-    if opt_option == "SGPM":
-        np.random.seed(2)
-        v = np.random.rand(p, d)
-        v, r = np.linalg.qr(v)
-        output = SGPM(v, A, B, At, Bt, alpha)
-        # return output
-        return output @ np.transpose(output)
+    # if opt_option == "SGPM":
+    # v = np.eye(3)
+    # v = v[:, 0:2]
+    # np.random.seed(2)
+    v = np.random.rand(p, d)
+    v, r = np.linalg.qr(v)
+    # v = np.eye(p)
+    # v = v[:, :d]
+    # print("This is A")
+    # print(A)
+    # print("------------------")
+    # print("This is B")
+    # print(B)
+    # print("------------------")
+    # print("This is At")
+    # print(At)
+    # print("------------------")
+    # print("This is Bt")
+    # print(Bt)
+    # print("------------------")
+    # print("This is initial V0")
+    # print(v)
+    # print("------------------")
+
+    output = SGPM(v, A, B, At, Bt, alpha)
+    return output
+    # return output @ np.transpose(output)
 
 
 def f_geoopt(A, B, a, v, At, Bt):
@@ -349,13 +288,23 @@ def f(A, B, alpha, v, At, Bt):
 
 
 def grad(A, B, alpha, v, At, Bt):
-    bv = np.linalg.inv(np.transpose(v) @ B @ v)
-    va = np.transpose(v) @ A @ v
-    bv_t = np.linalg.inv(np.transpose(v) @ Bt @ v)
-    va_t = np.transpose(v) @ At @ v
+    gradient = -2 * (A @ v @ scipy.linalg.inv(v.conj().T @ B @ v)) + 2 * (B @ v @ scipy.linalg.inv(v.conj().T @ B @ v) @ v.conj().T @ A @ v @ scipy.linalg.inv(v.conj().T @ B @ v)) + 2 * alpha * (At @ v @ scipy.linalg.inv(v.conj().T @ Bt @ v)) - 2 * alpha * (Bt @ v @ scipy.linalg.inv(
+        v.conj().T @ Bt @ v) @ v.conj().T @ At @ v @ scipy.linalg.inv(v.conj().T @ Bt @ v))
 
-    gradient = -2 * (A @ v @ bv - B @ v @ bv @ va @ bv -
-                     alpha * (At @ v @ bv_t - Bt @ v @ bv_t @ va_t @ bv_t))
+    # gradient = -2 * (A @ v @ np.linalg.inv(v.conj().T @ B @ v)) + 2 * (B @ v @ np.linalg.inv(v.conj().T @ B @ v) @ v.conj().T @ A @ v @ np.linalg.inv(v.conj().T @ B @ v)) + 2 * alpha * (At @ v @ np.linalg.inv(v.conj().T @ Bt @ v)) - 2 * alpha * (Bt @ v @ np.linalg.inv(
+    #     v.conj().T @ Bt @ v) @ v.conj().T @ At @ v @ np.linalg.inv(v.conj().T @ Bt @ v))
+    # gradient = -2 * (A @ v @ np.linalg.inv(v.T @ B @ v)) + 2 * (B @ v @ np.linalg.inv(v.T @ B @ v) @ v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)) + 2 * \
+    #     alpha * At @ v @ np.linalg.inv(v.T @ Bt @ v) - 2 * alpha * Bt @ v @ np.linalg.inv(
+    #         v.T @ Bt @ v) @ v.T @ At @ v @ np.linalg.inv(v.T @ Bt @ v)
+
+    # bv = np.linalg.inv(np.transpose(v) @ B @ v)
+    # va = np.transpose(v) @ A @ v
+    # bv_t = np.linalg.inv(np.transpose(v) @ Bt @ v)
+    # va_t = np.transpose(v) @ At @ v
+
+    # gradient = -2 * (A @ v @ bv - B @ v @ bv @ va @ bv -
+    #                  alpha * (At @ v @ bv_t - Bt @ v @ bv_t @ va_t @ bv_t))
+
     return gradient
 
 
@@ -389,6 +338,9 @@ def SGPM(X, A, B, At, Bt, a):
     F = f(A, B, a, X, At, Bt)
     G = grad(A, B, a, X, At, Bt)
     nfe = 1
+
+    # print("This is G")
+    # print(G)
 
     GX = np.transpose(G) @ X
 
@@ -527,7 +479,8 @@ def SGPM(X, A, B, At, Bt, a):
         crit[itr % nt, :] = [nrmG, XDiff, FDiff]
         mcrit = np.mean(crit[max(0, itr-nt+1):itr, :], axis=0)
 
-        if (XDiff < xtol and FDiff < ftol) or nrmG < gtol or all(mcrit[1:3] < 10 * np.hstack((xtol, ftol))):
+        if (XDiff < xtol and FDiff < ftol) or (nrmG < gtol) or np.all(mcrit[1:3] < 10 * np.array([xtol, ftol])):
+            # if (XDiff < xtol and FDiff < ftol) or (nrmG < gtol) or all(mcrit[1:3] < 10 * np.hstack((xtol, ftol))):
             if itr <= 2:
                 ftol = 0.1 * ftol
                 xtol = 0.1 * xtol

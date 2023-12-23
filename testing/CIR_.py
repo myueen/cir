@@ -154,7 +154,6 @@ def CIR(X, Y, Xt, Yt, a, d, opt_option):
     # Cov(E[Xt|Yt])
     sigma_Xt = np.zeros((Xt.shape[1], Xt.shape[1]))
     for i in range(len(interval_t) - 1):
-        mask_t = (interval_t[i] <= Yt) & (Yt <= interval_t[i+1])
         interval_mh_t = mh_t[i]
         outer_product_t = np.outer(interval_mh_t, interval_mh_t)
 

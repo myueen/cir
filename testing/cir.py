@@ -203,28 +203,10 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 
     # Use SGPM (Scaled Gradient Projection Method for Minimization over the Stiefel Manifold)
     # if opt_option == "SGPM":
-    # v = np.eye(3)
-    # v = v[:, 0:2]
-    # np.random.seed(2)
     v = np.random.rand(p, d)
     v, r = np.linalg.qr(v)
-    # v = np.eye(p)
-    # v = v[:, :d]
-    # print("This is A")
-    # print(A)
-    # print("------------------")
-    # print("This is B")
-    # print(B)
-    # print("------------------")
-    # print("This is At")
-    # print(At)
-    # print("------------------")
-    # print("This is Bt")
-    # print(Bt)
-    # print("------------------")
-    # print("This is initial V0")
-    # print(v)
-    # print("------------------")
+    v = np.eye(p)
+    v = v[:, :d]
 
     output = SGPM(v, A, B, At, Bt, alpha)
     return output

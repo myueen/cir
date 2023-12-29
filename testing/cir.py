@@ -15,6 +15,7 @@ from geoopt.optim import RiemannianSGD
 from geoopt.manifolds import Stiefel
 from scipy.linalg import solve
 from scipy.linalg import cholesky
+import sys
 
 
 def CIR(X, Y, Xt, Yt, alpha, d):
@@ -44,7 +45,6 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 
     Returns
     -------
-
 
     """
     X = np.array(X)
@@ -134,7 +134,6 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 
     # --------The following is for background data and the caase when a > 0-------
     # Center the data
-
     Xt = Xt - np.mean(Xt, axis=0)
 
     # Covariance matrix of background Xt
@@ -169,42 +168,43 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 
     # Optimization Algorithm on Stiefel Manifold
     # if opt_option == "geoopt":
-    #     A = torch.tensor(A, dtype=torch.double)
-    #     B = torch.tensor(B, dtype=torch.double)
-    #     alpha = torch.tensor(alpha, dtype=torch.double)
-    #     At = torch.tensor(At, dtype=torch.double)
-    #     Bt = torch.tensor(Bt, dtype=torch.double)
+    # A = torch.tensor(A, dtype=torch.double)
+    # B = torch.tensor(B, dtype=torch.double)
+    # alpha = torch.tensor(alpha, dtype=torch.double)
+    # At = torch.tensor(At, dtype=torch.double)
+    # Bt = torch.tensor(Bt, dtype=torch.double)
 
-    #     stiefel = geoopt.manifolds.Stiefel()
-    #     torch.manual_seed(1)
-    #     initial_point = torch.randn(p, d)
-    #     initial_point, _ = torch.linalg.qr(initial_point)
+    # stiefel = geoopt.manifolds.Stiefel()
+    # torch.manual_seed(1)
+    # initial_point = torch.randn(p, d)
+    # initial_point, _ = torch.linalg.qr(initial_point)
 
-    #     v = geoopt.ManifoldParameter(initial_point, manifold=stiefel)
+    # v = geoopt.ManifoldParameter(initial_point, manifold=stiefel)
 
-    #     optimizer = RiemannianSGD([v], lr=1e-3, momentum=0.9)
-    #     max_iterations = 50000
+    # optimizer = RiemannianSGD([v], lr=1e-3, momentum=0.9)
+    # max_iterations = 3000
 
-    #     for step in range(max_iterations):
-    #         vt = v.clone()
-    #         optimizer.zero_grad()
-    #         cost = f_geoopt(A, B, alpha, v, At, Bt)
-    #         gradient = grad_geoopt(A, B, alpha, v, At, Bt).to(torch.float)
-    #         v.grad = gradient
-    #         print(v.grad)
-    #         optimizer.step()
-    #         vt_plus = v.clone()
+    # for step in range(max_iterations):
+    #     vt = v.clone()
+    #     optimizer.zero_grad()
+    #     cost = f_geoopt(A, B, alpha, v, At, Bt)
+    #     gradient = grad_geoopt(A, B, alpha, v, At, Bt).to(torch.float)
+    #     v.grad = gradient
 
-    #         if stepExit(vt_plus, vt, cost, A, B, At, Bt, alpha):
-    #             break
+    #     optimizer.step()
+    #     vt_plus = v.clone()
 
-    #     output = v @ v.t()
-    #     return output
+    #     # if stepExit(vt_plus, vt, cost, A, B, At, Bt, alpha):
+    #     #     break
+
+    #     # output = v @ v.t()
+    # return v
 
     # Use SGPM (Scaled Gradient Projection Method for Minimization over the Stiefel Manifold)
     # if opt_option == "SGPM":
-    v = np.random.rand(p, d)
-    v, r = np.linalg.qr(v)
+
+    # v = np.random.rand(p, d)
+    # v, r = np.linalg.qr(v)
     v = np.eye(p)
     v = v[:, :d]
 
@@ -214,8 +214,12 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 
 
 # def f_geoopt(A, B, a, v, At, Bt):
-#     v = v.data
-#     v = v.to(torch.double)
+#     v = torch.tensor(v, dtype=torch.float64)
+#     A = torch.tensor(A, dtype=torch.float64)
+#     B = torch.tensor(B, dtype=torch.float64)
+#     a = torch.tensor(a, dtype=torch.float64)
+#     At = torch.tensor(At, dtype=torch.float64)
+#     Bt = torch.tensor(Bt, dtype=torch.float64)
 
 #     bv_inv = torch.inverse(v.t() @ B @ v)
 #     va = v.t() @ A @ v
@@ -223,12 +227,17 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 #     va_t = v.t() @ At @ v
 
 #     f_v = -torch.trace(va @ bv_inv) + a * torch.trace(va_t @ bv_t_inv)
+#     f_v = f_v.numpy()
 #     return f_v
 
 
 # def grad_geoopt(A, B, a, v, At, Bt):
-#     v = v.data
-#     v = v.to(torch.double)
+#     v = torch.tensor(v, dtype=torch.double)
+#     A = torch.tensor(A, dtype=torch.double)
+#     B = torch.tensor(B, dtype=torch.double)
+#     a = torch.tensor(a, dtype=torch.double)
+#     At = torch.tensor(At, dtype=torch.double)
+#     Bt = torch.tensor(Bt, dtype=torch.double)
 
 #     bv_inv = torch.inverse(v.t() @ B @ v)
 #     va = v.t() @ A @ v
@@ -239,6 +248,7 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 #     avb_t = At @ v @ bv_t_inv - Bt @ v @ bv_t_inv @ va_t @ bv_t_inv
 
 #     gradient = -2 * (avb - a * avb_t)
+#     gradient = gradient.numpy()
 #     return gradient
 
 
@@ -257,24 +267,22 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 #     elif abs(cost_vt_plus - cost) < ftol:
 #         return True
 #     else:
-    # return False
+#         return False
 
 
 def f(A, B, alpha, v, At, Bt):
-    bv = np.linalg.inv(np.transpose(v) @ B @ v)
-    va = np.transpose(v) @ A @ v
-    bv_t = np.linalg.inv(np.transpose(v) @ Bt @ v)
-    va_t = np.transpose(v) @ At @ v
-
-    f_v = -np.matrix.trace(va @ bv) + alpha * np.matrix.trace(va_t @ bv_t)
+    f_v = -np.trace(v.T @ A @ v @ scipy.linalg.inv(v.T @ B @ v)) + \
+        alpha * np.trace(v.T @ At @ v @ scipy.linalg.inv(v.T @ Bt @ v))
+    # f_v = -np.matrix.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)) + \
+    #     alpha * np.matrix.trace(v.T @ At @ v @ np.linalg.inv(v.T @ Bt @ v))
     return f_v
 
 
 def grad(A, B, alpha, v, At, Bt):
-    gradient = -2 * (A @ v @ scipy.linalg.inv(v.T @ B @ v)) + 2 * (B @ v @ scipy.linalg.inv(v.T @ B @ v) @ v.conj().T @ A @ v @ scipy.linalg.inv(v.T @ B @ v)) + 2 * \
+    G = -2 * (A @ v @ scipy.linalg.inv(v.T @ B @ v)) + 2 * (B @ v @ scipy.linalg.inv(v.T @ B @ v) @ v.T @ A @ v @ scipy.linalg.inv(v.T @ B @ v)) + 2 * \
         alpha * (At @ v @ scipy.linalg.inv(v.T @ Bt @ v)) - 2 * alpha * (Bt @ v @
-                                                                         scipy.linalg.inv(v.T @ Bt @ v) @ v.conj().T @ At @ v @ scipy.linalg.inv(v.T @ Bt @ v))
-    return gradient
+                                                                         scipy.linalg.inv(v.T @ Bt @ v) @ v.T @ At @ v @ scipy.linalg.inv(v.T @ Bt @ v))
+    return G
 
 
 def SGPM(X, A, B, At, Bt, a):
@@ -306,24 +314,25 @@ def SGPM(X, A, B, At, Bt, a):
     # Prepare for iterations
     F = f(A, B, a, X, At, Bt)
     G = grad(A, B, a, X, At, Bt)
-    nfe = 1
 
-    GX = np.transpose(G) @ X
+    nfe = 1
+    GX = G.T @ X
 
     if invH:
-        GXT = G @ np.transpose(X)
-        H = (GXT - np.transpose(GXT))
+        GXT = G @ X.T
+        H = (GXT - GXT.T)
     else:
         if projG == 1:
             U = np.hstack((G, X))
             V = np.hstack((X, -G))
-            VU = np.transpose(V) @ U
+            VU = V.T @ U
         elif projG == 2:
-            GB = G - 0.5 * X @ (np.transpose(X) @ G)
+            GB = G - 0.5 * X @ (X.T @ G)
             U = np.hstack((GB, X))
             V = np.hstack((X, -GB))
-            VU = np.transpose(V) @ U
-        VX = np.transpose(V) @ X
+            VU = V.T @ U
+
+        VX = V.T @ X
 
     dtX = G - X @ GX
     nrmG = np.linalg.norm(dtX, ord='fro')
@@ -377,13 +386,24 @@ def SGPM(X, A, B, At, Bt, a):
                 X = XP - U @ (tau * aa)
 
                 if abs(alpha - 0.5) > rho:
-                    XtX = np.transpose(X) @ X
+                    XtX = X.T @ X
                     L = cholesky(XtX, lower=False)
                     X = X @ np.linalg.inv(L)
+                    # L = torch.tensor(L, dtype=torch.double)
+                    # X = torch.tensor(X, dtype=torch.double)
+                    # X = torch.matmul(X, torch.inverse(L))
+                    # X = X.numpy()
 
             # calculate G, F
             F = f(A, B, a, X, At, Bt)
             G = grad(A, B, a, X, At, Bt)
+
+            # print("iteration ", itr)
+            # print(F)
+            # # print(G[:6, :])
+            # print("                                ")
+            # print("---------------------------------")
+
             nfe = nfe + 1
 
             if F <= Cval - tau * deriv or nls >= 5:
@@ -392,7 +412,7 @@ def SGPM(X, A, B, At, Bt, a):
             tau = eta * tau
             nls = nls + 1
 
-        GX = np.transpose(G) @ X
+        GX = G.T @ X
         dtX = G - X @ GX
         nrmG = np.linalg.norm(dtX, ord='fro')
 
@@ -409,34 +429,37 @@ def SGPM(X, A, B, At, Bt, a):
         # Computing the Riemannian Gradient
         if invH:
             if abs(alpha) > rho:
-                GXT = G @ np.transpose(X)
-                H = GXT - np.transpose(GXT)
+                GXT = G @ X.T
+                H = GXT - GXT.T
         else:
             if projG == 1:
                 U = np.hstack((G, X))
                 V = np.hstack((X, -G))
-                VU = np.transpose(V) @ U
+                VU = V.T @ U
             elif projG == 2:
-                GB = G - X @ (0.5 * np.transpose(GX))
+                GB = G - X @ (0.5 * GX.T)
                 U = np.hstack((GB, X))
                 V = np.hstack((X, -GB))
-                VU = np.transpose(V) @ U
-            VX = np.transpose(V) @ X
+                VU = V.T @ U
+            VX = V.T @ X
 
         # Compute the Alternate ODH step-size
         S = X - XP
+        # SS = np.sum(S * S)
         SS = np.sum(np.sum(np.multiply(S, S), axis=1), axis=0)
 
         XDiff = math.sqrt(SS * (1/n))
         FDiff = abs(FP - F) / (abs(FP) + 1)
 
         Y = dtX - dtXP
+        # SY = abs(np.sum(S * Y))
         SY = abs(np.sum(np.sum(np.multiply(S, Y), axis=1), axis=0))
 
         if itr % 2 == 0:
             tau = SS / SY
         else:
             YY = np.sum(np.sum(np.multiply(Y, Y), axis=1), axis=0)
+            # YY = np.sum(Y * Y)
             tau = SY / YY
 
         tau = max(min(tau, 1e20), 1e-20)
@@ -445,8 +468,8 @@ def SGPM(X, A, B, At, Bt, a):
         crit[itr % nt, :] = [nrmG, XDiff, FDiff]
         mcrit = np.mean(crit[max(0, itr-nt+1):itr, :], axis=0)
 
-        if (XDiff < xtol and FDiff < ftol) or (nrmG < gtol) or np.all(mcrit[1:3] < 10 * np.array([xtol, ftol])):
-            # if (XDiff < xtol and FDiff < ftol) or (nrmG < gtol) or all(mcrit[1:3] < 10 * np.hstack((xtol, ftol))):
+        # if (XDiff < xtol and FDiff < ftol) or (nrmG < gtol) or np.all(mcrit[1:3] < 10 * np.array([xtol, ftol])):
+        if (XDiff < xtol and FDiff < ftol) or (nrmG < gtol) or all(mcrit[1:3] < 10 * np.hstack((xtol, ftol))):
             if itr <= 2:
                 ftol = 0.1 * ftol
                 xtol = 0.1 * xtol
@@ -459,6 +482,81 @@ def SGPM(X, A, B, At, Bt, a):
         Q = gamma * Qp + 1
         Cval = (gamma * Qp * Cval + F) / Q
 
+        # if itr <= 50:
+        #     print("this is iteration ", itr)
+        #     print("this is XP:")
+        #     print(XP[:6, ])
+        #     print("                       ")
+        #     print("this is FP")
+        #     print(FP)
+        #     print("                       ")
+        #     print("this is dtXP")
+        #     print(dtXP[:6, ])
+        #     print("                       ")
+        #     print("this is alpha")
+        #     print(alpha)
+        #     print("                       ")
+        #     print("this is rho")
+        #     print(rho)
+        #     print("                       ")
+        #     print("this is tau")
+        #     print(tau)
+        #     print("                       ")
+        #     print("this is L")
+        #     print(L)
+        #     print("                       ")
+        #     print("this is Cval")
+        #     print(Cval)
+        #     print("                       ")
+        #     # print("this is A")
+        #     # print(A)
+        #     # print("this is B")
+        #     # print(B)
+        #     # print("this is At")
+        #     # print(At)
+        #     # print("this is Bt")
+        #     # print(Bt)
+        #     print("this is nrmG")
+        #     print(nrmG)
+        #     print("                       ")
+        #     print("this is nrmGP")
+        #     print(nrmGP)
+        #     print("                       ")
+        #    # print("this is GXT")
+        #    # print(GXT)
+        #    # print("                       ")
+        #    # print("this is H")
+        #    # print(H)
+        #    # print("                       ")
+        #     print("this is U")
+        #     print(U[:6, ])
+        #     print("this is V")
+        #     print(V[:6, ])
+        #     print("this is VU")
+        #     print(VU[:6, ])
+        #     # print("this is GB")
+        #     # print(GB)
+        #     print("this is S")
+        #     print(S[:6, ])
+        #     print("                       ")
+        #     print("this is SS")
+        #     print(SS)
+        #     print("                       ")
+        #     print("this is XDiff")
+        #     print(XDiff)
+        #     print("                       ")
+        #     print("this is FDiff")
+        #     print(FDiff)
+        #     print("                       ")
+        #     print("this is Y")
+        #     print(Y[:6, ])
+        #     print("                       ")
+        #     print("this is SY")
+        #     print(SY)
+        #     print("                       ")
+        #     print("this is YY")
+        #     print(YY)
+        #     print("------------------")
     end_time = time.time()
 
     F_eval = F_eval[0:itr, 0]
@@ -476,6 +574,7 @@ def SGPM(X, A, B, At, Bt, a):
         G = grad(A, B, a, X, At, Bt)
         dtX = G - X @ GX
         nrmG = np.linalg.norm(dtX, 'fro')
+        nfe = nfe + 1
         feasi = np.linalg.norm(X.T @ X - np.eye(k), 'fro')
 
     print('---------------------------------------------------\n')

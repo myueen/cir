@@ -273,8 +273,6 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 def f(A, B, alpha, v, At, Bt):
     f_v = -np.trace(v.T @ A @ v @ scipy.linalg.inv(v.T @ B @ v)) + \
         alpha * np.trace(v.T @ At @ v @ scipy.linalg.inv(v.T @ Bt @ v))
-    # f_v = -np.matrix.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)) + \
-    #     alpha * np.matrix.trace(v.T @ At @ v @ np.linalg.inv(v.T @ Bt @ v))
     return f_v
 
 
@@ -314,6 +312,8 @@ def SGPM(X, A, B, At, Bt, a):
     # Prepare for iterations
     F = f(A, B, a, X, At, Bt)
     G = grad(A, B, a, X, At, Bt)
+    np.set_printoptions(precision=15, suppress=True, threshold=sys.maxsize)
+    # print(G)
 
     nfe = 1
     GX = G.T @ X
@@ -342,7 +342,7 @@ def SGPM(X, A, B, At, Bt, a):
     if record == 1:
         fid = 1
         print(fid, '----------- Scaled Gradient Projection Method with Line search ----------- \n')
-        print(fid, '%4s %8s %8s %10s %10s\n',
+        print(fid, '%4s %8s %8s %10s %10s\n ',
               'Iter', 'tau', 'F(X)', 'nrmG', 'XDiff')
 
     # main iteration
@@ -389,20 +389,10 @@ def SGPM(X, A, B, At, Bt, a):
                     XtX = X.T @ X
                     L = cholesky(XtX, lower=False)
                     X = X @ np.linalg.inv(L)
-                    # L = torch.tensor(L, dtype=torch.double)
-                    # X = torch.tensor(X, dtype=torch.double)
-                    # X = torch.matmul(X, torch.inverse(L))
-                    # X = X.numpy()
 
             # calculate G, F
             F = f(A, B, a, X, At, Bt)
             G = grad(A, B, a, X, At, Bt)
-
-            # print("iteration ", itr)
-            # print(F)
-            # # print(G[:6, :])
-            # print("                                ")
-            # print("---------------------------------")
 
             nfe = nfe + 1
 

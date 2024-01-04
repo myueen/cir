@@ -77,8 +77,7 @@ def CIR(X, Y, Xt, Yt, alpha, d):
         raise ValueError("Yt should have the same number of rows as Xt")
 
     if not isinstance(d, int):
-        d = np.int64(d)
-    #     raise TypeError("d parameter must be an integer")
+        raise TypeError("d parameter should be an integer")
 
     if d < 1:
         raise ValueError("d must be greater than or equal to 1")

@@ -91,6 +91,8 @@ def CIR(X, Y, Xt, Yt, alpha, d):
     # Covariance matrix of foreground X
     cov_X = X.T @ X / n
 
+    slices, counts = slice_y(Y)
+
     # Define H, which represents the # of intervals I that splits range(Y)
     Y_unique = np.unique(Y)
     Y_unique_length = len(Y_unique)          # num of unique values in Y

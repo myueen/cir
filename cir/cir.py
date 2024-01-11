@@ -18,7 +18,7 @@ from scipy.linalg import cholesky
 import sys
 
 
-def CIR(X, Y, Xt, Yt, alpha, d):
+def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
     """Apply contrastive inverse regression dimension reduction on X.
 
     Parameters
@@ -42,6 +42,8 @@ def CIR(X, Y, Xt, Yt, alpha, d):
 
     d : integer value
         reduced dimension 
+
+    sliceY: default = 10 
 
     Returns
     -------
@@ -96,7 +98,6 @@ def CIR(X, Y, Xt, Yt, alpha, d):
     # Define H, which represents the # of intervals I that splits range(Y)
     Y_unique = np.unique(Y)
     Y_unique_length = len(Y_unique)          # num of unique values in Y
-    print(Y_unique)
     if Y_unique_length == 2:
         H = 2                       # number of slices
     elif 2 < Y_unique_length <= 10:

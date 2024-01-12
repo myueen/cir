@@ -1,8 +1,5 @@
 import numpy as np
 import pandas as pd
-import sys
-from scipy.linalg import eigh
-import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.tree import DecisionTreeClassifier

@@ -9,6 +9,9 @@ from scipy.linalg import cholesky
 import sys
 
 
+__all__ = ['ContrastiveInverseRegression']
+
+
 def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
     """Contrastive inversse regression (CIR) for dimension reduction
 

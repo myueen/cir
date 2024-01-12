@@ -3,9 +3,9 @@ import numpy as np
 from numpy.linalg import norm
 from importlib import reload
 import sys
-import cir_
-from cir_ import CIR
-reload(cir_)
+import contrastive_inverse_regression.cir.cir as cir
+from contrastive_inverse_regression.cir.cir import CIR
+reload(cir)
 
 
 d = 2

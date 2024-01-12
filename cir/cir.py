@@ -166,51 +166,13 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
     At = cov_Xt @ sigma_Xt @ cov_Xt
     Bt = cov_Xt @ cov_Xt
 
-    # Optimization Algorithm on Stiefel Manifold
-    # if opt_option == "geoopt":
-    # A = torch.tensor(A, dtype=torch.double)
-    # B = torch.tensor(B, dtype=torch.double)
-    # alpha = torch.tensor(alpha, dtype=torch.double)
-    # At = torch.tensor(At, dtype=torch.double)
-    # Bt = torch.tensor(Bt, dtype=torch.double)
-
-    # stiefel = geoopt.manifolds.Stiefel()
-    # torch.manual_seed(1)
-    # initial_point = torch.randn(p, d)
-    # initial_point, _ = torch.linalg.qr(initial_point)
-
-    # v = geoopt.ManifoldParameter(initial_point, manifold=stiefel)
-
-    # optimizer = RiemannianSGD([v], lr=1e-3, momentum=0.9)
-    # max_iterations = 3000
-
-    # for step in range(max_iterations):
-    #     vt = v.clone()
-    #     optimizer.zero_grad()
-    #     cost = f_geoopt(A, B, alpha, v, At, Bt)
-    #     gradient = grad_geoopt(A, B, alpha, v, At, Bt).to(torch.float)
-    #     v.grad = gradient
-
-    #     optimizer.step()
-    #     vt_plus = v.clone()
-
-    #     # if stepExit(vt_plus, vt, cost, A, B, At, Bt, alpha):
-    #     #     break
-
-    #     # output = v @ v.t()
-    # return v
-
-    # Use SGPM (Scaled Gradient Projection Method for Minimization over the Stiefel Manifold)
-    # if opt_option == "SGPM":
-
-    # v = np.random.rand(p, d)
-    # v, r = np.linalg.qr(v)
-    v = np.eye(p)
-    v = v[:, :d]
+    v = np.random.rand(p, d)
+    v, r = np.linalg.qr(v)
+    # v = np.eye(p)
+    # v = v[:, :d]
 
     output = SGPM(v, A, B, At, Bt, alpha)
     return output
-    # return output @ np.transpose(output)
 
 
 # def f_geoopt(A, B, a, v, At, Bt):

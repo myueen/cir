@@ -4,10 +4,10 @@ import time
 import matplotlib
 from matplotlib import pyplot as plt
 
-import cir_
-from cir_ import CIR
+import cir
+from cir import CIR
 from importlib import reload
-reload(cir_)
+reload(cir)
 
 
 data = pd.read_csv(

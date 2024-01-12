@@ -3,10 +3,10 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
-import cir_
-from cir_ import CIR
+import cir
+from cir import CIR
 from importlib import reload
-reload(cir_)
+reload(cir)
 
 
 data = pd.read_table('contrastive-inverse-regression/cir/Retinol.txt',

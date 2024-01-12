@@ -1,18 +1,12 @@
 import numpy as np
 import pandas as pd
-import time
-from scipy.linalg import eigh
-import matplotlib.pyplot as plt
-import sklearn
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
-import statsmodels
-import statsmodels.api as sm
 
-import cir
-from cir import CIR
+import cir_
+from cir_ import CIR
 from importlib import reload
-reload(cir)
+reload(cir_)
 
 
 data = pd.read_table('contrastive-inverse-regression/cir/Retinol.txt',

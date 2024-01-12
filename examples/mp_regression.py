@@ -4,7 +4,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.tree import DecisionTreeClassifier
 
-from cir.cir_ import CIR
+from cir_.cir import CIR
+# from cir_.cir import CIR
 # from importlib import reload
 # import cir
 # from cir import CIR

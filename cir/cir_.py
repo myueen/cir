@@ -42,8 +42,9 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
         reduced dimension 
 
     n_sliceY: int (default = 10)
-        The number of slices to split Y, used for calculating the covariance of X with
-        respect to Y. 
+        The number of slices to split Y if it is continuous, used for calculating the covariance 
+        of X with respect to Y. For the case if Y is discrete, the number of slices equals to the 
+        number of unique values in Y
 
     Returns
     -------
@@ -100,18 +101,14 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
     # Covariance matrix of foreground X
     cov_X = X.T @ X / n
 
-    # Define H, which represents the # of intervals I that splits range(Y)
+    # Define H, which represents the # of intervals that splits range(Y)
     Y_unique = np.unique(Y)
-    Y_unique_length = len(Y_unique)          # num of unique values in Y
-    if Y_unique_length == 2:
-        H = 2                       # number of slices
-    elif 2 < Y_unique_length <= 10:
-        H = Y_unique_length
+    Y_unique_len = len(Y_unique)          # num of unique values in Y
+
+    if Y_unique_len < 10:
+        H = Y_unique_len
     else:
-        if d <= 2:
-            H = 10
-        else:
-            H = 4
+        H = n_sliceY
 
     # Cov(E[X|Y])
     sigma_X = np.zeros((p, p))

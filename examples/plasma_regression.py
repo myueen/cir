@@ -9,10 +9,10 @@ from sklearn.metrics import mean_squared_error
 import statsmodels
 import statsmodels.api as sm
 
-import contrastive_inverse_regression.cir.cir_ as cir_
-from contrastive_inverse_regression.cir.cir_ import CIR
+import cir
+from cir import CIR
 from importlib import reload
-reload(cir_)
+reload(cir)
 
 
 data = pd.read_table('contrastive-inverse-regression/cir/Retinol.txt',

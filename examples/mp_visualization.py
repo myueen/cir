@@ -11,7 +11,7 @@ reload(cir)
 
 
 data = pd.read_csv(
-    'contrastive-inverse-regression/cir/Data_Cortex_Nuclear.csv')
+    'contrastive_inverse_regression/cir/Data_Cortex_Nuclear.csv')
 
 # foreground data
 fg = data.dropna()

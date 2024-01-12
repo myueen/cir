@@ -6,14 +6,15 @@ import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.tree import DecisionTreeClassifier
-from importlib import reload
-import cir
-from cir import CIR
-reload(cir)
 
+from cir.cir_ import CIR
+# from importlib import reload
+# import cir
+# from cir import CIR
+# reload(cir)
 
 data = pd.read_csv(
-    'contrastive-inverse-regression/cir/Data_Cortex_Nuclear.csv')
+    'contrastive_inverse_regression/cir/Data_Cortex_Nuclear.csv')
 
 # foreground data
 fg = data.dropna()

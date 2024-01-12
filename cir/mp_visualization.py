@@ -2,14 +2,17 @@ import numpy as np
 import pandas as pd
 import time
 from scipy.linalg import eigh
-import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib import pyplot as plt
 
 import cir
 from cir import CIR
 from importlib import reload
 reload(cir)
 
-data = pd.read_csv('Data_Cortex_Nuclear.csv')
+
+data = pd.read_csv(
+    'contrastive-inverse-regression/cir/Data_Cortex_Nuclear.csv')
 
 # foreground data
 fg = data.dropna()

@@ -3,23 +3,21 @@ import pandas as pd
 import math
 import time
 import scipy
-import sliced
-from sliced import base
-from sliced.base import slice_y, grouped_sum, unique_counts
-from scipy.linalg import eigh, qr
-from numpy.linalg import norm
-import torch
-import warnings
-import geoopt
-from geoopt.optim import RiemannianSGD
-from geoopt.manifolds import Stiefel
+from scipy.linalg import eigh
 from scipy.linalg import solve
 from scipy.linalg import cholesky
 import sys
 
 
 def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
-    """Apply contrastive inverse regression dimension reduction method on matrix X.
+    """Contrastive inversse regression (CIR) for dimension reduction
+
+
+
+
+
+
+
 
     Parameters
     ----------
@@ -28,7 +26,7 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
         and p is the number of features 
 
     Y : array-like, shape(t, 1)
-        Foreground response 1-dimensional array, where t is the number of observations 
+        Foreground response 1-dimensional array, where t is the number of observations
 
     Xt : array-like, shape(m, k)
          Backgroundd data, where m is the number of observations 
@@ -43,10 +41,19 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
     d : integer value
         reduced dimension 
 
-    sliceY: default = 10 
+    n_sliceY: int (default = 10)
+        The number of slices to split Y, used for calculating the covariance of X with
+        respect to Y. 
 
     Returns
     -------
+    v : solution from minimization over the Stiefel Manifold 
+
+
+    Reference
+    -----------
+    [1] 
+
 
     """
     X = np.array(X)
@@ -171,8 +178,8 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
     v, r = np.linalg.qr(v)
     # v = np.eye(p)
     # v = v[:, :d]
-    output = SGPM(v, A, B, At, Bt, alpha)
-    return output
+    v = SGPM(v, A, B, At, Bt, alpha)
+    return v
 
 
 def f(A, B, alpha, v, At, Bt):

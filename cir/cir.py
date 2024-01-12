@@ -9,55 +9,85 @@ from scipy.linalg import cholesky
 import sys
 
 
-# __all__ = ['ContrastiveInverseRegression']
+__all__ = ['ContrastiveInverseRegression']
 
 
-def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
-    """Contrastive inversse regression (CIR) for dimension reduction
+def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, continuous_Yt=False):
+    """Contrastive inversse regression for dimension reduction (CIR) [1]
 
+    Under a supervised contrastive dimension reduction setting, the algorithm
+    finds a low-dimensional representation of x, denoted by V, by solving the 
+    nonconvex optimization problem on the Stiefel manifold, associated with the
+    input foreground and background matrix.
 
+    Both the sample covariance matrix of foreground matrix X and the covariance 
+    of X with respect to its corresponding output Y, are obtained to construct 
+    matrix A and B. A similar procedure for the background matrix Xt and its 
+    corresponding output Yt to obtain matrix At and Bt. 
 
+    The contrastive loss function f and gradient of f is provided as input for 
+    the gradient-based minimization algorithm on the Stiefel manifold. 
 
-
-
-
+    In the case when alpha = 0, the loss function f is reduced to only pertaining
+    to the foreground matrix, becoming a generalized eigenproblem. 
 
     Parameters
     ----------
     X : array-like, shape(n, p)
-        Foreground data, where n is the number of observations
-        and p is the number of features 
+        Foreground data, where n is the number of
+        observations and p is the number of features. 
 
-    Y : array-like, shape(t, 1)
-        Foreground response 1-dimensional array, where t is the number of observations
+    Y : array-like, shape(n, 1)
+        Foreground response 1-dimensional array, where n
+        is the number of observations.
 
     Xt : array-like, shape(m, k)
-         Backgroundd data, where m is the number of observations 
-         and k is the number of features 
+        Backgroundd data, where m is the number of
+        observations and k is the number of features.
 
-    Yt : array-like, shape(s, 1)
-         Background response 1-dimensional array, where s is the number of observations
+    Yt : array-like, shape(m, 1)
+        Background response 1-dimensional array, 
+        where s is the number of observations.
 
     alpha : float value
-            hyperparameter for importance of background group in contrastive loss function
+        Hyperparameter for importance of background
+        group in contrastive loss function.
 
     d : integer value
-        reduced dimension 
+        The number of reduced dimension. 
 
-    n_sliceY: int (default = 10)
-        The number of slices to split Y if it is continuous, used for calculating the covariance 
-        of X with respect to Y. For the case if Y is discrete, the number of slices equals to the 
-        number of unique values in Y
+    n_sliceY : int (default = 10)
+        The number of slices to split foreground Y if it is continuous, used for
+        calculating the covariance of X with respect to Y. For the case if Y is
+        discrete, the number of slices equals to the number of unique values in Y.
+
+    n_sliceYt : int (default = 10)
+        The number of slices to split background Yt if it is continuous, used for 
+        calculating the covariance of Xt with respect to Yt. For the case if Yt is
+        discrete, the number of slices equals to the number of unique values in Yt.
+
+    continuous_Y : boolean (default = False)
+        Determine whether the foreground Y array is continuous or discrete.
+
+    continuous_Yt : boolean (default = False)
+        Determine whether the background Yt array is continuous or discrete.
 
     Returns
     -------
-    v : solution from minimization over the Stiefel Manifold 
+    v : array-like
+        Solution from minimization over the Stiefel Manifold.
 
 
     Reference
     -----------
-    [1] 
+    [1] Hawke, S., Luo, H., & Li, D. (2023)
+        "Contrastive Inverse Regression for Dimension Reduction",
+        Retrieved from https://arxiv.org/abs/2305.12287 
 
+    [2] Harry Oviedo (2024).
+       SGPM for minimization over the Stiefel Manifold (https://www.mathworks.com
+       /matlabcentral/fileexchange/73505-sgpm-for-minimization-over-the-stiefel-manifold), 
+       MATLAB Central File Exchange. Retrieved January 12, 2024.
 
     """
     X = np.array(X)
@@ -124,7 +154,6 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
         sigma_X += outer_product
     sigma_X = sigma_X/n
 
-    # Generalized Eigenvalue Decomposition
     A = cov_X @ sigma_X @ cov_X
     B = cov_X @ cov_X
 
@@ -225,7 +254,6 @@ def SGPM(X, A, B, At, Bt, a):
     F = f(A, B, a, X, At, Bt)
     G = grad(A, B, a, X, At, Bt)
     np.set_printoptions(precision=15, suppress=True, threshold=sys.maxsize)
-    # print(G)
 
     nfe = 1
     GX = G.T @ X
@@ -410,4 +438,5 @@ def SGPM(X, A, B, At, Bt, a):
     print('   Iteration number = %d\n' % itr)
     print('   Cpu time (secs) = %3.4f\n' % (end_time - start_time))
     print('   Number of evaluation(Obj. func) = %d\n' % nfe)
+
     return X

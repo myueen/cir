@@ -19,7 +19,7 @@ import sys
 
 
 def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
-    """Apply contrastive inverse regression dimension reduction on X.
+    """Apply contrastive inverse regression dimension reduction method on matrix X.
 
     Parameters
     ----------
@@ -57,17 +57,17 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
     n, p = X.shape
     m, k = Xt.shape
 
-    # if np.array_equal(X[:, 0], np.arange(1, len(X) + 1)):
-    #     raise ValueError("X should not have an index column")
+    if np.array_equal(X[:, 0], np.arange(1, len(X) + 1)):
+        raise ValueError("X should not have an index column")
 
-    # if np.array_equal(Xt[:, 0], np.arange(1, len(Xt) + 1)):
-    #     raise ValueError("Xt should not have an index column")
+    if np.array_equal(Xt[:, 0], np.arange(1, len(Xt) + 1)):
+        raise ValueError("Xt should not have an index column")
 
-    # if np.array_equal(Y[:, 0], np.arange(1, len(Y) + 1)):
-    #     raise ValueError("Y should not have an index column")
+    if np.array_equal(Y[:], np.arange(1, len(Y) + 1)):
+        raise ValueError("Y should not have an index column")
 
-    # if np.array_equal(Yt[:, 0], np.arange(1, len(Yt) + 1)):
-    #     raise ValueError("Yt should not have an index column")
+    if np.array_equal(Yt[:], np.arange(1, len(Yt) + 1)):
+        raise ValueError("Yt should not have an index column")
 
     if k != p:
         raise ValueError("Xt should have the same number of columns as X")
@@ -166,70 +166,13 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10):
     At = cov_Xt @ sigma_Xt @ cov_Xt
     Bt = cov_Xt @ cov_Xt
 
+    # Use SGPM (Scaled Gradient Projection Method for Minimization over the Stiefel Manifold)
     v = np.random.rand(p, d)
     v, r = np.linalg.qr(v)
     # v = np.eye(p)
     # v = v[:, :d]
-
     output = SGPM(v, A, B, At, Bt, alpha)
     return output
-
-
-# def f_geoopt(A, B, a, v, At, Bt):
-#     v = torch.tensor(v, dtype=torch.float64)
-#     A = torch.tensor(A, dtype=torch.float64)
-#     B = torch.tensor(B, dtype=torch.float64)
-#     a = torch.tensor(a, dtype=torch.float64)
-#     At = torch.tensor(At, dtype=torch.float64)
-#     Bt = torch.tensor(Bt, dtype=torch.float64)
-
-#     bv_inv = torch.inverse(v.t() @ B @ v)
-#     va = v.t() @ A @ v
-#     bv_t_inv = torch.inverse(v.t() @ Bt @ v)
-#     va_t = v.t() @ At @ v
-
-#     f_v = -torch.trace(va @ bv_inv) + a * torch.trace(va_t @ bv_t_inv)
-#     f_v = f_v.numpy()
-#     return f_v
-
-
-# def grad_geoopt(A, B, a, v, At, Bt):
-#     v = torch.tensor(v, dtype=torch.double)
-#     A = torch.tensor(A, dtype=torch.double)
-#     B = torch.tensor(B, dtype=torch.double)
-#     a = torch.tensor(a, dtype=torch.double)
-#     At = torch.tensor(At, dtype=torch.double)
-#     Bt = torch.tensor(Bt, dtype=torch.double)
-
-#     bv_inv = torch.inverse(v.t() @ B @ v)
-#     va = v.t() @ A @ v
-#     bv_t_inv = torch.inverse(v.t() @ Bt @ v)
-#     va_t = v.t() @ At @ v
-
-#     avb = A @ v @ bv_inv - B @ v @ bv_inv @ va @ bv_inv
-#     avb_t = At @ v @ bv_t_inv - Bt @ v @ bv_t_inv @ va_t @ bv_t_inv
-
-#     gradient = -2 * (avb - a * avb_t)
-#     gradient = gradient.numpy()
-#     return gradient
-
-
-# def stepExit(vt_plus, vt, cost, A, B, At, Bt, a) -> bool:
-#     xtol = 1e-6
-#     gtol = 1e-4
-#     ftol = 1e-12
-#     distance = torch.norm(vt_plus @ vt_plus.t() - vt @ vt.t(), 'fro')
-#     vt_plus_gradient = grad_geoopt(A, B, a, vt_plus, At, Bt)
-#     cost_vt_plus = f_geoopt(A, B, a, vt_plus, At, Bt)
-
-#     if distance < xtol:
-#         return True
-#     elif torch.norm(vt_plus_gradient, 'fro') < gtol:
-#         return True
-#     elif abs(cost_vt_plus - cost) < ftol:
-#         return True
-#     else:
-#         return False
 
 
 def f(A, B, alpha, v, At, Bt):
@@ -397,21 +340,18 @@ def SGPM(X, A, B, At, Bt, a):
 
         # Compute the Alternate ODH step-size
         S = X - XP
-        # SS = np.sum(S * S)
         SS = np.sum(np.sum(np.multiply(S, S), axis=1), axis=0)
 
         XDiff = math.sqrt(SS * (1/n))
         FDiff = abs(FP - F) / (abs(FP) + 1)
 
         Y = dtX - dtXP
-        # SY = abs(np.sum(S * Y))
         SY = abs(np.sum(np.sum(np.multiply(S, Y), axis=1), axis=0))
 
         if itr % 2 == 0:
             tau = SS / SY
         else:
             YY = np.sum(np.sum(np.multiply(Y, Y), axis=1), axis=0)
-            # YY = np.sum(Y * Y)
             tau = SY / YY
 
         tau = max(min(tau, 1e20), 1e-20)
@@ -420,7 +360,6 @@ def SGPM(X, A, B, At, Bt, a):
         crit[itr % nt, :] = [nrmG, XDiff, FDiff]
         mcrit = np.mean(crit[max(0, itr-nt+1):itr, :], axis=0)
 
-        # if (XDiff < xtol and FDiff < ftol) or (nrmG < gtol) or np.all(mcrit[1:3] < 10 * np.array([xtol, ftol])):
         if (XDiff < xtol and FDiff < ftol) or (nrmG < gtol) or all(mcrit[1:3] < 10 * np.hstack((xtol, ftol))):
             if itr <= 2:
                 ftol = 0.1 * ftol
@@ -434,81 +373,6 @@ def SGPM(X, A, B, At, Bt, a):
         Q = gamma * Qp + 1
         Cval = (gamma * Qp * Cval + F) / Q
 
-        # if itr <= 50:
-        #     print("this is iteration ", itr)
-        #     print("this is XP:")
-        #     print(XP[:6, ])
-        #     print("                       ")
-        #     print("this is FP")
-        #     print(FP)
-        #     print("                       ")
-        #     print("this is dtXP")
-        #     print(dtXP[:6, ])
-        #     print("                       ")
-        #     print("this is alpha")
-        #     print(alpha)
-        #     print("                       ")
-        #     print("this is rho")
-        #     print(rho)
-        #     print("                       ")
-        #     print("this is tau")
-        #     print(tau)
-        #     print("                       ")
-        #     print("this is L")
-        #     print(L)
-        #     print("                       ")
-        #     print("this is Cval")
-        #     print(Cval)
-        #     print("                       ")
-        #     # print("this is A")
-        #     # print(A)
-        #     # print("this is B")
-        #     # print(B)
-        #     # print("this is At")
-        #     # print(At)
-        #     # print("this is Bt")
-        #     # print(Bt)
-        #     print("this is nrmG")
-        #     print(nrmG)
-        #     print("                       ")
-        #     print("this is nrmGP")
-        #     print(nrmGP)
-        #     print("                       ")
-        #    # print("this is GXT")
-        #    # print(GXT)
-        #    # print("                       ")
-        #    # print("this is H")
-        #    # print(H)
-        #    # print("                       ")
-        #     print("this is U")
-        #     print(U[:6, ])
-        #     print("this is V")
-        #     print(V[:6, ])
-        #     print("this is VU")
-        #     print(VU[:6, ])
-        #     # print("this is GB")
-        #     # print(GB)
-        #     print("this is S")
-        #     print(S[:6, ])
-        #     print("                       ")
-        #     print("this is SS")
-        #     print(SS)
-        #     print("                       ")
-        #     print("this is XDiff")
-        #     print(XDiff)
-        #     print("                       ")
-        #     print("this is FDiff")
-        #     print(FDiff)
-        #     print("                       ")
-        #     print("this is Y")
-        #     print(Y[:6, ])
-        #     print("                       ")
-        #     print("this is SY")
-        #     print(SY)
-        #     print("                       ")
-        #     print("this is YY")
-        #     print(YY)
-        #     print("------------------")
     end_time = time.time()
 
     F_eval = F_eval[0:itr, 0]

@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import time
-from scipy.linalg import eigh
 import matplotlib
 from matplotlib import pyplot as plt
 

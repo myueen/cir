@@ -138,10 +138,10 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
     Y_unique = np.unique(Y)
     Y_unique_len = len(Y_unique)          # num of unique values in Y
 
-    if Y_unique_len < 10:
-        H = Y_unique_len
-    else:
+    if continuous_Y:
         H = n_sliceY
+    else:
+        H = Y_unique_len
 
     # Cov(E[X|Y])
     sigma_X = np.zeros((p, p))
@@ -178,15 +178,11 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
     # Define Ht, which represents the # of interval I that splits range(Yt)
     Yt_unique = np.unique(Yt)
     Yt_unique_length = len(Yt_unique)  # num of unique values in Yt
-    if Yt_unique_length == 2:
-        Ht = 2
-    elif 2 < Yt_unique_length <= 10:
-        Ht = Yt_unique_length
+
+    if continuous_Yt:
+        Ht = n_sliceYt
     else:
-        if d <= 2:
-            Ht = 10
-        else:
-            Ht = 4
+        Ht = Yt_unique_length
 
     sigma_Xt = np.zeros((k, k))
     for l in range(Ht):

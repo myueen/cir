@@ -5,12 +5,6 @@ cir is a python package provided the algorithm for contrastive inverse regressio
 
 Example
 --------
-Detailed examples for employing cir are provided. 
-
-For the case of discrete foreground Y values, the mouse protein dataset  Data_Cortex_Nuclear.csv is used and the corresponding visualization in mp_regression.py and regression testing in mp_regression.py.
-
-For the case of continuous foreground Y values, cir is applied on the retinol dataset Retinol.txt and the corresponding regression is in plasma_regression.py. Continuous values are not usually for classification, hence visualization is not provided. 
-
 The dataset for the following example is included in the datasets_example folder. 
 ```python
     import pandas as pd
@@ -36,6 +30,11 @@ The dataset for the following example is included in the datasets_example folder
 
     V = CIR(fg, Y, bg, Yt, alpha, d)
 ```
+Other detailed examples for employing cir are provided. 
+
+For the case of discrete foreground Y values, the mouse protein dataset  Data_Cortex_Nuclear.csv is used and the corresponding visualization in mp_regression.py and regression testing in mp_regression.py.
+
+For the case of continuous foreground Y values, cir is applied on the retinol dataset Retinol.txt and the corresponding regression is in plasma_regression.py. Continuous values are not usually for classification, hence visualization is not provided. 
 
 
 Dependencies

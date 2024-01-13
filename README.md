@@ -1,4 +1,5 @@
-|Python Package Index| 
+[![Python Package Index](https://img.shields.io/pypi/v/contrastive-inverse-regression.svg)](https://pypi.org/project/contrastive-inverse-regression)
+
 
 contrastive-inverse-regression
 ======
@@ -90,8 +91,6 @@ If you find this algorithm helpful in your research, please add the following bi
     }
 ```
 
-
-[![Python Package Index](https://img.shields.io/pypi/v/contrastive-inverse-regression.svg)](https://pypi.org/project/contrastive-inverse-regression)
 
 
 

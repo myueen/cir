@@ -67,16 +67,6 @@ Alternatively, you can also install by cloning this repository:
 
 ```
 
-References:
-------------
-.. [1] : Hawke, S., Luo, H., & Li, D. (2023)
-        "Contrastive Inverse Regression for Dimension Reduction",
-        Retrieved from https://arxiv.org/abs/2305.12287 
-
-.. [2] Harry Oviedo (2024).
-       SGPM for minimization over the Stiefel Manifold (https://www.mathworks.com/matlabcentral/fileexchange/73505-sgpm-for-minimization-over-the-stiefel-manifold), MATLAB Central File Exchange. Retrieved January 12, 2024.
-
-
 Citing contrastive-inverse-regression
 ---------------------------------------
 If you find this algorithm helpful in your research, please add the following bibtex citation in references.
@@ -90,6 +80,18 @@ If you find this algorithm helpful in your research, please add the following bi
         primaryClass={stat.ML}
     }
 ```
+
+References:
+------------
+.. [1] : Hawke, S., Luo, H., & Li, D. (2023)
+        "Contrastive Inverse Regression for Dimension Reduction",
+        Retrieved from https://arxiv.org/abs/2305.12287 
+
+.. [2] Harry Oviedo (2024).
+       SGPM for minimization over the Stiefel Manifold (https://www.mathworks.com/matlabcentral/fileexchange/73505-sgpm-for-minimization-over-the-stiefel-manifold), MATLAB Central File Exchange. Retrieved January 12, 2024.
+
+
+
 
 
 

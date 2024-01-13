@@ -3,11 +3,11 @@ import pandas as pd
 import time
 import matplotlib
 from matplotlib import pyplot as plt
-from cir.cir import CIR
+from cir.contrastive_inverse_regression.cir import CIR
 
 
 data = pd.read_csv(
-    'contrastive_inverse_regression/Data_Cortex_Nuclear.csv')
+    'cir/Data_Cortex_Nuclear.csv')
 
 # foreground data
 fg = data.dropna()

@@ -1,11 +1,10 @@
 import pandas as pd
 import numpy as np
 from numpy.linalg import norm
-from importlib import reload
-import sys
-import contrastive_inverse_regression.cir.cir as cir
-from contrastive_inverse_regression.cir.cir import CIR
-reload(cir)
+from cir.contrastive_inverse_regression import CIR
+
+# If running the test in the folder does not work, try move the test.py file
+# out of the tests folder and in the same path as cir.py
 
 
 d = 2

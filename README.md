@@ -14,7 +14,7 @@ Make sure you have numpy, pandas, and scipy install beforehand and the version o
 
 ```python
 
-    pip install contrastive-inverse-regression
+pip install contrastive-inverse-regression
 
 ```
 
@@ -22,7 +22,7 @@ Alternatively, you can also install by cloning this repository:
 
 ```python
 
-    pip install git+https://github.com/myueen/cir.git
+pip install git+https://github.com/myueen/cir.git
 
 ```
 

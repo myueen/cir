@@ -6,10 +6,10 @@ cir is a python package provided the algorithm for contrastive inverse regressio
 
 Dependencies
 ------------
-- Python >= 3.10.9
-- numpy >= 1.24.3
-- pandas >= 2.1.4
-- scipy >= 1.9.3
+- Python (>= 3.10.9)
+- numpy (>= 1.24.3)
+- pandas (>= 2.1.4)
+- scipy (>= 1.9.3)
 
 
 References:

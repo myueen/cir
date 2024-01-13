@@ -1,5 +1,9 @@
+|Python Package Index| 
+
 contrastive-inverse-regression
 ======
+
+
 cir is a python package provided the algorithm for contrastive inverse regression (CIR) for dimension reduction used in a supervised setting to find a low-dimensional representation by solving a nonconvex optimization problem on the Stiefel manifold. 
 
 
@@ -72,23 +76,6 @@ References:
        SGPM for minimization over the Stiefel Manifold (https://www.mathworks.com/matlabcentral/fileexchange/73505-sgpm-for-minimization-over-the-stiefel-manifold), MATLAB Central File Exchange. Retrieved January 12, 2024.
 
 
-<!-- Dataset Source: 
----------------
-
-```python
-    @article{abid2018exploring,
-    title={Exploring patterns enriched in a dataset with contrastive principal component analysis},
-    author={Abid, Abubakar and Zhang, Martin J and Bagaria, Vivek K and Zou, James},
-    journal={Nature communications},
-    volume={9},
-    number={1},
-    pages={2134},
-    year={2018},
-    }
-
-``` -->
-
-
 Citing contrastive-inverse-regression
 ---------------------------------------
 If you find this algorithm helpful in your research, please add the following bibtex citation in references.
@@ -102,6 +89,12 @@ If you find this algorithm helpful in your research, please add the following bi
         primaryClass={stat.ML}
     }
 ```
+
+
+[![Python Package Index](https://img.shields.io/pypi/v/contrastive-inverse-regression.svg)](https://pypi.org/project/contrastive-inverse-regression)
+
+
+
 
 
 

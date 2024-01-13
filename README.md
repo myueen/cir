@@ -72,7 +72,7 @@ References:
        SGPM for minimization over the Stiefel Manifold (https://www.mathworks.com/matlabcentral/fileexchange/73505-sgpm-for-minimization-over-the-stiefel-manifold), MATLAB Central File Exchange. Retrieved January 12, 2024.
 
 
-Dataset Source: 
+<!-- Dataset Source: 
 ---------------
 
 ```python
@@ -86,7 +86,7 @@ Dataset Source:
     year={2018},
     }
 
-```
+``` -->
 
 
 Citing contrastive-inverse-regression

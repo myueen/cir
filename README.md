@@ -1,4 +1,4 @@
-cir
+contrastive-inverse-regression
 ======
 cir is a python package provided the algorithm for contrastive inverse regression (CIR) for dimension reduction used in a supervised setting to find a low-dimensional representation by solving a nonconvex optimization problem on the Stiefel manifold. 
 
@@ -44,6 +44,24 @@ Dependencies
 To run exmaple, matplotlib (>= 3.8.2) is required
 
 
+Installation
+------------
+Make sure you have numpy, pandas, and scipy install beforehand and the version of these packages compatible with cir. The easy way to install is using ``pip``:
+
+```python
+
+    pip install contrastive-inverse-regression
+
+```
+
+Alternatively, you can also install by cloning this repository: 
+
+```python
+
+    pip install git+https://github.com/myueen/cir.git
+
+```
+
 References:
 ------------
 .. [1] : Hawke, S., Luo, H., & Li, D. (2023)
@@ -70,6 +88,20 @@ Dataset Source:
 
 ```
 
+
+Citing contrastive-inverse-regression
+---------------------------------------
+If you find this algorithm helpful in your research, please add the following bibtex citation in references.
+```python
+    @phdthesis{contrastive_inverse_regression2023Hawke,
+        title={Contrastive inverse regression for dimension reduction},
+        author={Sam Hawke, Hengrui Luo, Didong Li},
+        year={2023}
+        eprint={2305.12287},
+        archivePrefix={arXiv},
+        primaryClass={stat.ML}
+    }
+```
 
 
 

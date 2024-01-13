@@ -3,7 +3,7 @@ import pandas as pd
 import time
 import matplotlib
 from matplotlib import pyplot as plt
-from cir.cir import CIR
+from contrastive_inverse_regression import CIR
 
 
 data = pd.read_csv(

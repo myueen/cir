@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.tree import DecisionTreeClassifier
-from cir.cir import CIR
+from contrastive_inverse_regression import CIR
 
 
 data = pd.read_csv(

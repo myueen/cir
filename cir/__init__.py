@@ -1,4 +1,4 @@
-from cir import CIR, f, grad, SGPM
+from cir.cir_ import CIR, f, grad, SGPM
 
 
 __version__ = "1.0.0"

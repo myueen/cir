@@ -7,28 +7,25 @@ Example
 --------
 The dataset for the following example is included in the datasets_example folder. 
 ```python
+    from contrastive_inverse_regression import CIR
     import pandas as pd
-    import numpy as np
 
     d = 2
     alpha = 0.0001
 
-    fg = pd.read_csv('foregroundX.csv')
-    bg = pd.read_csv('backgroundX.csv')
-    Y = pd.read_csv('foregroundY.csv')
-    Yt = pd.read_csv('backgroundY.csv')
+    # download the dataset and set it to the absolute path in your computer 
+    fg = pd.read_csv('../foregroundX.csv')
+    bg = pd.read_csv('../backgroundX.csv')
+    Y = pd.read_csv('../foregroundY.csv')
+    Yt = pd.read_csv('../backgroundY.csv')
 
     fg = fg.iloc[0:, 1:]
-    fg = np.array(fg)
     bg = bg.iloc[0:, 1:]
-    bg = np.array(bg)
-
     Y = Y.iloc[0:, 1:]
-    Y = np.array(Y)
     Yt = Yt.iloc[0:, 1:]
-    Yt = np.array(Yt)
 
     V = CIR(fg, Y, bg, Yt, alpha, d)
+
 ```
 Other detailed examples for employing cir are provided. 
 

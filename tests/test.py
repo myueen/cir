@@ -1,10 +1,7 @@
 import pandas as pd
 import numpy as np
 from numpy.linalg import norm
-from cir.contrastive_inverse_regression import CIR
-
-# If running the test in the folder does not work, try move the test.py file
-# out of the tests folder and in the same path as cir.py
+from contrastive_inverse_regression import CIR
 
 
 d = 2

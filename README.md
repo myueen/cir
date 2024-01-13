@@ -83,7 +83,7 @@ If you find this algorithm helpful in your research, please add the following bi
 }
 ```
 
-References:
+References
 ------------
 .. [1] : Hawke, S., Luo, H., & Li, D. (2023)
         "Contrastive Inverse Regression for Dimension Reduction",

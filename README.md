@@ -33,14 +33,20 @@ References:
 
 Dataset Source: 
 ---------------
-.. [1] @article{abid2018exploring,
-  title={Exploring patterns enriched in a dataset with contrastive principal component analysis},
-  author={Abid, Abubakar and Zhang, Martin J and Bagaria, Vivek K and Zou, James},
-  journal={Nature communications},
-  volume={9},
-  number={1},
-  pages={2134},
-  year={2018},
-}
+
+```python
+    @article{abid2018exploring,
+    title={Exploring patterns enriched in a dataset with contrastive principal component analysis},
+    author={Abid, Abubakar and Zhang, Martin J and Bagaria, Vivek K and Zou, James},
+    journal={Nature communications},
+    volume={9},
+    number={1},
+    pages={2134},
+    year={2018},
+    }
+
+```
+
+
 
 

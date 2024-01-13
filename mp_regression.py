@@ -61,12 +61,9 @@ for i in range(1):
     Accuracy_CIR_KNN = np.mean(cross_val_results)
     accurary_group.append(Accuracy_CIR_KNN)
 
-print("this is CIR_KNN ")
-print(accurary_group)
-print("This is mean")
-print(np.mean(accurary_group))
-print("This is standard deviation")
-print(np.std(accurary_group))
+print("this is CIR_KNN ", accurary_group)
+print("This is mean ", np.mean(accurary_group))
+print("This is standard deviation", np.std(accurary_group))
 
 
 accurary_group_tree = []
@@ -83,9 +80,6 @@ for i in range(1):
     Accuracy_CIR_Tree = cross_val_results.mean()
     accurary_group_tree.append(Accuracy_CIR_Tree)
 
-print("this is CIR_Tree ")
-print(accurary_group_tree)
-print("This is mean")
-print(np.mean(accurary_group_tree))
-print("This is standard deviation")
-print(np.std(accurary_group_tree))
+print("this is CIR_Tree ", accurary_group_tree)
+print("This is mean ", np.mean(accurary_group_tree))
+print("This is standard deviation ", np.std(accurary_group_tree))

@@ -44,6 +44,8 @@ Dependencies
 - pandas (>= 2.1.4)
 - scipy (>= 1.9.3)
 
+To run exmaple, matplotlib (>= 3.8.2) is required
+
 
 References:
 ------------

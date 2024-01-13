@@ -39,7 +39,7 @@ To run exmaple, matplotlib (>= 3.8.2) is required
 
 Example
 --------
-The dataset for the following example is included in the example/data folder. 
+The dataset for the following example is included in the example/dataset folder. 
 ```python
     from contrastive_inverse_regression import CIR
     import pandas as pd

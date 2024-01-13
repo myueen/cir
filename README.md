@@ -41,24 +41,24 @@ Example
 --------
 The dataset for the following example is included in the example/dataset folder. 
 ```python
-    from contrastive_inverse_regression import CIR
-    import pandas as pd
+from contrastive_inverse_regression import CIR
+import pandas as pd
 
-    d = 2
-    alpha = 0.0001
+d = 2
+alpha = 0.0001
 
-    # download the dataset and set it to the absolute path in your computer 
-    fg = pd.read_csv('../foregroundX.csv')
-    bg = pd.read_csv('../backgroundX.csv')
-    Y = pd.read_csv('../foregroundY.csv')
-    Yt = pd.read_csv('../backgroundY.csv')
+# download the dataset and set it to the absolute path in your computer 
+fg = pd.read_csv('../foregroundX.csv')
+bg = pd.read_csv('../backgroundX.csv')
+Y = pd.read_csv('../foregroundY.csv')
+Yt = pd.read_csv('../backgroundY.csv')
 
-    fg = fg.iloc[0:, 1:]
-    bg = bg.iloc[0:, 1:]
-    Y = Y.iloc[0:, 1:]
-    Yt = Yt.iloc[0:, 1:]
+fg = fg.iloc[0:, 1:]
+bg = bg.iloc[0:, 1:]
+Y = Y.iloc[0:, 1:]
+Yt = Yt.iloc[0:, 1:]
 
-    V = CIR(fg, Y, bg, Yt, alpha, d)
+V = CIR(fg, Y, bg, Yt, alpha, d)
 
 ```
 Other detailed examples for employing cir are provided. 
@@ -73,14 +73,14 @@ Citing contrastive-inverse-regression
 ---------------------------------------
 If you find this algorithm helpful in your research, please add the following bibtex citation in references.
 ```python
-    @phdthesis{contrastive_inverse_regression2023Hawke,
-        title={Contrastive inverse regression for dimension reduction},
-        author={Sam Hawke, Hengrui Luo, Didong Li},
-        year={2023}
-        eprint={2305.12287},
-        archivePrefix={arXiv},
-        primaryClass={stat.ML}
-    }
+@phdthesis{contrastive_inverse_regression2023Hawke,
+    title={Contrastive inverse regression for dimension reduction},
+    author={Sam Hawke, Hengrui Luo, Didong Li},
+    year={2023}
+    eprint={2305.12287},
+    archivePrefix={arXiv},
+    primaryClass={stat.ML}
+}
 ```
 
 References:

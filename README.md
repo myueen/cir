@@ -73,13 +73,12 @@ Citing contrastive-inverse-regression
 ---------------------------------------
 If you find this algorithm helpful in your research, please add the following bibtex citation in references.
 ```python
-@phdthesis{contrastive_inverse_regression2023Hawke,
-    title={Contrastive inverse regression for dimension reduction},
-    author={Sam Hawke, Hengrui Luo, Didong Li},
-    year={2023}
-    eprint={2305.12287},
-    archivePrefix={arXiv},
-    primaryClass={stat.ML}
+
+@phdthesis{hawke2023contrastive,
+  title={Contrastive inverse regression for dimension reduction},
+  author={Hawke, Sam and Luo, Hengrui and Li, Didong},
+  journal={arXiv preprint arXiv:2305.12287},
+  year={2023}
 }
 ```
 

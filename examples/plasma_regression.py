@@ -40,7 +40,6 @@ for i in range(m):
 d = 2
 alpha = 0.1
 
-
 V_CIR = CIR(fg, labels, bg, labelst, alpha, d, continuous_Y=True)
 X_CIR = X @ V_CIR
 

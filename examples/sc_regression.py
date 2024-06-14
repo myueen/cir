@@ -3,11 +3,20 @@ import pandas as pd
 import time
 from scipy.linalg import eigh
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.linear_model import LassoCV
+from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.neural_network import MLPClassifier
 
-import cir
-from cir import CIR
+
+import contrastive_inverse_regression
+from contrastive_inverse_regression import CIR
 from importlib import reload
-reload(cir)
+reload(contrastive_inverse_regression)
 
 
 data = pd.read_csv('pbmc_1_counts.csv')

@@ -13,12 +13,13 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
 
 
-import contrastive_inverse_regression
-from contrastive_inverse_regression import CIR
+import cir
+from cir import CIR
 from importlib import reload
-reload(contrastive_inverse_regression)
+reload(cir)
 
 
+# first unzip 'pbmc_1_counts.csv.zip'
 data = pd.read_csv('pbmc_1_counts.csv')
 data = data.iloc[:, 1:]
 data = data.transpose()

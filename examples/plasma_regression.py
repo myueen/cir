@@ -2,10 +2,10 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
-from contrastive_inverse_regression import CIR
+from cir import CIR
 
 
-data = pd.read_table('contrastive_inverse_regression/Retinol.txt',
+data = pd.read_table('Retinol.txt',
                      header=None, delim_whitespace=True)
 data = data.iloc[:, :]
 

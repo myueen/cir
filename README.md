@@ -41,7 +41,7 @@ Example
 --------
 The dataset for the following example is included in the example/dataset folder. 
 ```python
-from contrastive_inverse_regression import CIR
+from cir import CIR
 import pandas as pd
 
 d = 2

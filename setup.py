@@ -6,13 +6,13 @@ with open("README.md", "r") as f:
 
 setup(
     name='contrastive_inverse_regression',
-    version='1.0.5',
+    version='1.0.5pip lis',
     packages=find_packages(),
-    install_requires=[
-        'numpy>=1.0.3',
-        'pandas>=1.0.1',
-        'scipy>=1.1.3'
-    ],
+    # install_requires=[
+    #     'numpy>=1.0.3',
+    #     'pandas>=1.0.1',
+    #     'scipy>=1.1.3'
+    # ],
 
     long_description=description,
     long_description_content_type="text/markdown",

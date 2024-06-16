@@ -4,8 +4,8 @@ with open("README.md", "r") as f:
     description = f.read()
 
 setup(
-    name='contrastive_inverse_regression',
-    version='1.0.3',
+    name='contrastiveIR',
+    version='1.0.4',
     packages=find_packages(),
     install_requires=[
         'numpy>=1.24.3',

@@ -14,7 +14,7 @@ Make sure you have numpy, pandas, and scipy install beforehand and the version o
 
 ```python
 
-pip install contrastive-inverse-regression
+pip install contrastiveIR
 
 ```
 

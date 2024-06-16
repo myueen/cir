@@ -3,7 +3,8 @@ import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.tree import DecisionTreeClassifier
-from cir import CIR
+import contrastive_inverse_regression
+from contrastive_inverse_regression import CIR
 
 
 data = pd.read_csv('Data_Cortex_Nuclear.csv')

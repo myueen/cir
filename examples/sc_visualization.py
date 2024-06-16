@@ -11,10 +11,8 @@ from sklearn.linear_model import Lasso
 from sklearn.manifold import TSNE
 import umap
 
-import cir
-from cir import CIR
-from importlib import reload
-reload(cir)
+import contrastive_inverse_regression
+from contrastive_inverse_regression import CIR
 
 
 data = pd.read_csv('pbmc_1_counts.csv')

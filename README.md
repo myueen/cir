@@ -1,7 +1,7 @@
 [![Python Package Index](https://img.shields.io/pypi/v/contrastive-inverse-regression.svg)](https://pypi.org/project/contrastive-inverse-regression)
 
 
-contrastiveIR
+contrastive_inverse_regression
 ======
 
 
@@ -14,7 +14,7 @@ Make sure you have numpy, pandas, and scipy install beforehand and the version o
 
 ```python
 
-pip install contrastiveIR
+pip install contrastive-inverse-regression
 
 ```
 
@@ -41,7 +41,8 @@ Example
 --------
 The dataset for the following example is included in the example/dataset folder. 
 ```python
-from cir import CIR
+import contrastive_inverse_regression
+from contrastive_inverse_regression import CIR
 import pandas as pd
 
 d = 2

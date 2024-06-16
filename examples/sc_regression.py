@@ -12,12 +12,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
 
-
-import cir
-from cir import CIR
-from importlib import reload
-reload(cir)
-
+import contrastive_inverse_regression
+from contrastive_inverse_regression import CIR
 
 # first unzip 'pbmc_1_counts.csv.zip'
 data = pd.read_csv('pbmc_1_counts.csv')

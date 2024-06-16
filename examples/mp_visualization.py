@@ -11,7 +11,8 @@ from sklearn.metrics import silhouette_score
 from scipy.linalg import eig
 from sklearn.manifold import TSNE
 from sklearn.metrics import silhouette_score
-from cir import CIR
+import contrastive_inverse_regression
+from contrastive_inverse_regression import CIR
 
 
 data = pd.read_csv(

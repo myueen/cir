@@ -1,7 +1,7 @@
 [![Python Package Index](https://img.shields.io/pypi/v/contrastive-inverse-regression.svg)](https://pypi.org/project/contrastive-inverse-regression)
 
 
-contrastive-inverse-regression
+contrastiveIR
 ======
 
 

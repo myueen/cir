@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'numpy>=1.24.3',
-        'pandas>=2.1.4',
+        'pandas>=2.0.1',
         'scipy>=1.9.3'
     ],
 

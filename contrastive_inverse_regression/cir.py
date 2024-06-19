@@ -167,6 +167,10 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
         v = eigenvectors[:, :d]
         f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
 
+        print('---------------------------------------------------\n')
+        print('Results for SIR (when alpha = 0) \n')
+        print('---------------------------------------------------\n')
+        print('   Obj. function = %7.6e\n' % f_v)
         return v
 
     # --------The following is for background data and the caase when a > 0-------

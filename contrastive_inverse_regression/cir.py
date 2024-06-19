@@ -166,7 +166,8 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
         cov_X = np.array(cov_X)
         v = eigenvectors[:, :d]
         f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
-        return v, f_v
+
+        return v
 
     # --------The following is for background data and the caase when a > 0-------
     # Center the data

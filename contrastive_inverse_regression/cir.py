@@ -131,6 +131,28 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
     # Center the matrix X by subtracting the original matrix X by the column means of X
     X = X - np.mean(X, axis=0)
 
+    if alpha == 0:
+        Sigma_XX = X.T @ X / n
+        Sigma_X = np.zeros((p, p))
+
+        for l in range(1, L):
+            X_curr = fg.values[Y == l]
+            n_curr = X_curr.shape[0]
+            Sigma_X += n_curr * np.outer(X_curr.mean(axis=0) - fg.values.mean(axis=0), X_curr.mean(axis=0) - fg.values.mean(axis=0))
+
+
+        Sigma_X /= n
+        eigvals, eigvecs = scipy.linalg.eig(Sigma_XX, Sigma_X)
+        V_SIR = eigvecs[:, :d]
+
+        f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
+
+        print('---------------------------------------------------\n')
+        print('Results for SIR (when alpha = 0) \n')
+        print('---------------------------------------------------\n')
+        print('   Obj. function = %7.6e\n' % f_v)
+        return V_SIR
+
     # Covariance matrix of foreground X
     cov_X = X.T @ X / n
 
@@ -157,21 +179,6 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
     A = cov_X @ sigma_X @ cov_X
     B = cov_X @ cov_X
 
-    if alpha == 0:
-        eigenvalues, eigenvectors = np.linalg.eigh(sigma_X)
-        epsilon = 2 * abs(np.min(eigenvalues))
-        sigma_X = sigma_X + epsilon * np.identity(p)
-        eigenvalues, eigenvectors = eigh(cov_X, sigma_X)
-
-        cov_X = np.array(cov_X)
-        v = eigenvectors[:, :d]
-        f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
-
-        print('---------------------------------------------------\n')
-        print('Results for SIR (when alpha = 0) \n')
-        print('---------------------------------------------------\n')
-        print('   Obj. function = %7.6e\n' % f_v)
-        return v
 
     # --------The following is for background data and the caase when a > 0-------
     # Center the data

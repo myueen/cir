@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='contrastive_inverse_regression',
-    version='1.0.9',
+    version='1.0.10',
     packages=find_packages(),
     # install_requires=[
     #     'numpy>=1.0.3',

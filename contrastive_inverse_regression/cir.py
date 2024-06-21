@@ -128,10 +128,24 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
     if alpha < 0:
         raise ValueError("a must be greater than or equal to 0")
 
-    # Center the matrix X by subtracting the original matrix X by the column means of X
-    X = X - np.mean(X, axis=0)
-
     if alpha == 0:
+        fg = X
+        bg = Xt
+
+        Y = Y.astype(float)
+        labels = np.unique(Y)      # set of unique foreground labels
+        L = len(labels)
+        Y = Y.reshape(-1)     # reshape into (40411,) rather than (40411,1)
+
+        Yt = Yt.astype(float)
+        Yt = Yt.reshape(-1)
+
+        n = fg.shape[0]
+        X = fg - np.mean(fg, axis=0)
+        X = X.values
+
+        m, p = bg.shape
+
         Sigma_XX = X.T @ X / n
         Sigma_X = np.zeros((p, p))
 
@@ -152,6 +166,9 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
         print('---------------------------------------------------\n')
         print('   Obj. function = %7.6e\n' % f_v)
         return V_SIR
+
+    # Center the matrix X by subtracting the original matrix X by the column means of X
+    X = X - np.mean(X, axis=0)
 
     # Covariance matrix of foreground X
     cov_X = X.T @ X / n

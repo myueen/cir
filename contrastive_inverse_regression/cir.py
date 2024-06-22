@@ -156,7 +156,8 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
         eigvals, eigvecs = scipy.linalg.eig(Sigma_XX, Sigma_X)
         V_SIR = eigvecs[:, :d]
 
-        f_v = -1 * (np.trace(v.T @ A @ v @ np.linalg.inv(v.T @ B @ v)))
+        f_v = -1 * (np.trace(V_SIR.T @ A @ V_SIR @
+                    np.linalg.inv(V_SIR.T @ B @ V_SIR)))
 
         print('---------------------------------------------------\n')
         print('Results for SIR (when alpha = 0) \n')

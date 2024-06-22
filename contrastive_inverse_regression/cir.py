@@ -156,13 +156,9 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
         eigvals, eigvecs = scipy.linalg.eig(Sigma_XX, Sigma_X)
         V_SIR = eigvecs[:, :d]
 
-        f_v = -1 * (np.trace(V_SIR.T @ A @ V_SIR @
-                    np.linalg.inv(V_SIR.T @ B @ V_SIR)))
-
         print('---------------------------------------------------\n')
         print('Results for SIR (when alpha = 0) \n')
         print('---------------------------------------------------\n')
-        print('   Obj. function = %7.6e\n' % f_v)
         return V_SIR
 
     # Center the matrix X by subtracting the original matrix X by the column means of X

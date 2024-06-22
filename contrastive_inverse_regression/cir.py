@@ -129,16 +129,13 @@ def CIR(X, Y, Xt, Yt, alpha, d, n_sliceY=10, n_sliceYt=10, continuous_Y=False, c
         raise ValueError("a must be greater than or equal to 0")
 
     if alpha == 0:
-        fg = X
-        bg = Xt
+        fg = pd.DataFrame(X)
+        bg = pd.DataFrame(Xt)
 
         Y = Y.astype(float)
         labels = np.unique(Y)      # set of unique foreground labels
         L = len(labels)
-        Y = Y.reshape(-1)     # reshape into (40411,) rather than (40411,1)
-
         Yt = Yt.astype(float)
-        Yt = Yt.reshape(-1)
 
         n = fg.shape[0]
         X = fg - np.mean(fg, axis=0)

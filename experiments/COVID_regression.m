@@ -38,13 +38,11 @@ Lt = length(labelst); % number of background classes/slices
 
 
 
-opt_alpha = [1e-5, 1e-8, 1e-6, 1e-8, 1e-09, 1e-7, 1e-8];
+opt_alpha = [1e-5, 1e-8, 1e-6, 1e-8, 1e-09, 1e-7];
 Ds = 2:1:7;
 Accuracy_Tree = [];
 Accuracy_KNN = [];
-Accuracy_SVM = [];
-Accuracy_boosting = [];
-Accuracy_NN = [];
+
 for i = 1:length(Ds)
 
     d = Ds(i);
@@ -56,9 +54,10 @@ for i = 1:length(Ds)
     [coeff,score,latent] = pca(X);
     X_PCA = score(:,1:d);
 
+
     % CPCA
     display('CPCA......')
-    alpha_CPCA = 2; %
+    alpha_CPCA = 2; 
     [coeff_CPCA,D_CPCA] = eig(cov(fg)-alpha_CPCA*cov(bg));
     V_CPCA = coeff_CPCA(:,1:d);
     X_CPCA = X*V_CPCA;
@@ -95,10 +94,12 @@ for i = 1:length(Ds)
     V_SIR = coeff_SIR(:,1:d);
     X_SIR = X*V_SIR;
 
+
     % CIR
     display('CIR......')
     V_CIR = CIR(fg,Y,bg,Yt,alpha,d);
     X_CIR = X*V_CIR;
+
 
     %% Multiple classifiers, KNN is the most suitable one here
     T = 10;
@@ -147,78 +148,12 @@ for i = 1:length(Ds)
 
     
 
-
-        % display('Training SVM')
-        % tic
-        % % SVM
-        % mdl_raw_SVM = fitcnet(fg,Y,'CrossVal','on');
-        % mdl_PCA_SVM = fitcnet(X_PCA,Y,'CrossVal','on');
-        % mdl_CPCA_SVM = fitcnet(X_CPCA,Y,'CrossVal','on');
-        % mdl_LDA_SVM = fitcnet(X_LDA,Y,'CrossVal','on');
-        % mdl_LASSO_SVM = fitcnet(X_LASSO,Y,'CrossVal','on');
-        % mdl_SIR_SVM  = fitcnet(X_SIR,Y,'CrossVal','on');
-        % mdl_CIR_SVM = fitcnet(X_CIR,Y,'CrossVal','on');
-        % Accuracy_raw_SVM = 1-kfoldLoss(mdl_raw_SVM);
-        % Accuracy_PCA_SVM = 1-kfoldLoss(mdl_PCA_SVM);
-        % Accuracy_CPCA_SVM = 1-kfoldLoss(mdl_CPCA_SVM);
-        % Accuracy_LDA_SVM = 1-kfoldLoss(mdl_LDA_SVM);
-        % Accuracy_LASSO_SVM = 1-kfoldLoss(mdl_LASSO_SVM);
-        % Accuracy_SIR_SVM = 1-kfoldLoss(mdl_SIR_SVM);
-        % Accuracy_CIR_SVM = 1-kfoldLoss(mdl_CIR_SVM);
-        % Accuracy_SVM(i,:,t) = [Accuracy_raw_SVM,Accuracy_PCA_SVM,Accuracy_CPCA_SVM,Accuracy_LDA_SVM,Accuracy_LASSO_SVM,Accuracy_SIR_SVM,Accuracy_CIR_SVM];
-        % toc
-        
-
-        % display('Training Boosting')
-        % tic
-        % % Boosting
-        % mdl_raw_boosting = fitcecoc(fg,Y,'CrossVal','on');
-        % mdl_PCA_boosting = fitcecoc(X_PCA,Y,'CrossVal','on');
-        % mdl_CPCA_boosting = fitcecoc(X_CPCA,Y,'CrossVal','on');
-        % mdl_LDA_boosting = fitcecoc(X_LDA,Y,'CrossVal','on');
-        % mdl_LASSO_boosting = fitcecoc(X_LASSO,Y,'CrossVal','on');
-        % mdl_SIR_boosting  = fitcecoc(X_SIR,Y,'CrossVal','on');
-        % mdl_CIR_boosting = fitcecoc(X_CIR,Y,'CrossVal','on');
-        % Accuracy_raw_boosting = 1-kfoldLoss(mdl_raw_boosting);
-        % Accuracy_PCA_boosting = 1-kfoldLoss(mdl_PCA_boosting);
-        % Accuracy_CPCA_boosting = 1-kfoldLoss(mdl_CPCA_boosting);
-        % Accuracy_LDA_boosting = 1-kfoldLoss(mdl_LDA_boosting);
-        % Accuracy_LASSO_boosting = 1-kfoldLoss(mdl_LASSO_boosting);
-        % Accuracy_SIR_boosting = 1-kfoldLoss(mdl_SIR_boosting);
-        % Accuracy_CIR_boosting = 1-kfoldLoss(mdl_CIR_boosting);
-        % Accuracy_boosting(i,:,t) = [Accuracy_raw_boosting,Accuracy_PCA_boosting,Accuracy_CPCA_boosting,Accuracy_LDA_boosting,Accuracy_LASSO_boosting,Accuracy_SIR_boosting,Accuracy_CIR_boosting];
-        % toc
-       
-        % display('Training Neural Network')
-        % tic
-        % % Neural Network
-        % mdl_raw_NN = fitcensemble(fg,Y,'CrossVal','on');
-        % mdl_PCA_NN = fitcensemble(X_PCA,Y,'CrossVal','on');
-        % mdl_CPCA_NN = fitcensemble(X_CPCA,Y,'CrossVal','on');
-        % mdl_LDA_NN = fitcensemble(X_LDA,Y,'CrossVal','on');
-        % mdl_LASSO_NN = fitcensemble(X_LASSO,Y,'CrossVal','on');
-        % mdl_SIR_NN  = fitcensemble(X_SIR,Y,'CrossVal','on');
-        % mdl_CIR_NN = fitcensemble(X_CIR,Y,'CrossVal','on');
-        % Accuracy_raw_NN = 1-kfoldLoss(mdl_raw_NN);
-        % Accuracy_PCA_NN = 1-kfoldLoss(mdl_PCA_NN);
-        % Accuracy_CPCA_NN = 1-kfoldLoss(mdl_CPCA_NN);
-        % Accuracy_LDA_NN = 1-kfoldLoss(mdl_LDA_NN);
-        % Accuracy_LASSO_NN = 1-kfoldLoss(mdl_LASSO_NN);
-        % Accuracy_SIR_NN = 1-kfoldLoss(mdl_SIR_NN);
-        % Accuracy_CIR_NN = 1-kfoldLoss(mdl_CIR_NN);
-        % Accuracy_NN(i,:,t) = [Accuracy_raw_NN,Accuracy_PCA_NN,Accuracy_CPCA_NN,Accuracy_LDA_NN,Accuracy_LASSO_NN,Accuracy_SIR_NN,Accuracy_CIR_NN];
-        % toc
-        % 
-
        display(['raw, ','PCA, ','CPCA, ','LDA, ','LASSO, ','SIR, ','CIR.'])
     
 
        display(['KNN accuracy: ',num2str(Accuracy_raw_KNN),', ', num2str(Accuracy_PCA_KNN),', ',num2str(Accuracy_CPCA_KNN),', ',num2str(Accuracy_LDA_KNN),', ',num2str(Accuracy_LASSO_KNN),', ',num2str(Accuracy_SIR_KNN),', ', num2str(Accuracy_CIR_KNN)])
        display(['Decision Tree accuracy: ',num2str(Accuracy_raw_Tree),', ', num2str(Accuracy_PCA_Tree),', ',num2str(Accuracy_CPCA_Tree),', ',num2str(Accuracy_LDA_Tree),', ',num2str(Accuracy_LASSO_Tree),', ', num2str(Accuracy_SIR_Tree),', ', num2str(Accuracy_CIR_Tree)])
-       % display(['SVM accuracy: ',num2str(Accuracy_raw_SVM),', ', num2str(Accuracy_PCA_SVM),', ',num2str(Accuracy_CPCA_SVM),', ',num2str(Accuracy_LDA_SVM),', ',num2str(Accuracy_LASSO_SVM),', ', num2str(Accuracy_SIR_SVM),', ', num2str(Accuracy_CIR_SVM)])
-       % display(['Boosting accuracy: ',num2str(Accuracy_raw_boosting),', ', num2str(Accuracy_PCA_boosting),', ',num2str(Accuracy_CPCA_boosting),', ',num2str(Accuracy_LDA_boosting),', ',num2str(Accuracy_LASSO_boosting),', ', num2str(Accuracy_SIR_boosting),', ', num2str(Accuracy_CIR_boosting)])
-       % display(['NN accuracy: ',num2str(Accuracy_raw_NN),', ', num2str(Accuracy_PCA_NN),', ',num2str(Accuracy_CPCA_NN),', ',num2str(Accuracy_LDA_NN),', ',num2str(Accuracy_LASSO_NN),', ', num2str(Accuracy_SIR_NN),', ', num2str(Accuracy_CIR_NN)])
-   
+  
     end
 end
 

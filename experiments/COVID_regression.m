@@ -170,3 +170,17 @@ disp('Tree Accuracy')
 disp('..........................................')
 disp(['2, ','3, ','4, ','5, ','6, ','7.'])
 disp(Accuracy_Tree_mean')
+
+
+
+Ds = 2:1:7; 
+Accuracy_KNN = Accuracy_KNN';
+
+figure('Position', [100, 100, 900, 600])
+hold on
+for j = 1:size(Accuracy_KNN,2)
+    plot(Ds(1:6),Accuracy_KNN(1:6,j),'LineWidth',2);
+end
+legend({'Raw','PCA','CPCA','LDA','LASSO','SIR','CIR'}, 'Location', 'westoutside', 'FontSize', 16);
+
+hold off

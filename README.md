@@ -14,9 +14,9 @@ Matlab files Dependency
 -----------------------
 For running files in Matlab, there are some functions listed below must be installed in advance, and adding these paths to the current directory where the Matlab files in *experiments* is executed on the local computer is also essential. 
 
-- *dbindex* (Davies Bouldin index): https://www.mathworks.com/matlabcentral/fileexchange/118685-auto-cvi-tool-an-automatic-cluster-validity-index-toolbox?s_tid=srchtitle (download all files)
+- **dbindex** (Davies Bouldin index): https://www.mathworks.com/matlabcentral/fileexchange/118685-auto-cvi-tool-an-automatic-cluster-validity-index-toolbox?s_tid=srchtitle (download all files)
 
-- *UMAP* (uniform manifold approximation and projection): https://www.mathworks.com/matlabcentral/fileexchange/71902-uniform-manifold-approximation-and-projection-umap (download all files)
+- **UMAP** (uniform manifold approximation and projection): https://www.mathworks.com/matlabcentral/fileexchange/71902-uniform-manifold-approximation-and-projection-umap (download all files)
 
 
 

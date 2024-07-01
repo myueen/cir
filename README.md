@@ -3,16 +3,16 @@
 contrastive_inverse_regression
 ======
 
-This repository contains Matlab files and notebooks to reproduce results in clustering analysis and classification accuracy of various dimension reduction methods for experiments using biomedical data. (see [manuscript](
+This repository contains Matlab files and notebooks to reproduce results in clustering analysis and classification accuracy of various dimension reduction methods for biomedical data experiments. (see [manuscript](
 https://doi.org/10.48550/arXiv.2305.12287)). 
 
-This repository contains the main contrastive-inverse-regression (CIR) algorithm in both Matlab and python version. But since clustering analysis and classification analysis are conducted in Matlab, it is our intend for the
-purpose of reproducibity of the result to use the Matlab file (CIR.m). The python package is available as an feasible alternative. 
+This repository contains the main contrastive-inverse-regression (CIR) algorithm in both Matlab and python. But since clustering analysis and classification analysis are conducted in Matlab, it is our intent for the
+purpose of reproducibity to use the Matlab file (CIR.m) when running matlab files in the experiments folder. The python package is available as an feasible alternative. 
 
 
 Matlab files Dependency 
 -----------------------
-For running files in Matlab, there are some functions listed below must be installed in advance, and adding these paths to the current directory where the Matlab files in *experiments* is executed on the local computer is also essential. 
+When running Matlab files, there are some functions listed below that must be installed in advance, and adding these installed file paths to the current directory where the Matlab files in *experiments* folder is executed on the local computer is also essential. 
 
 - **dbindex** (Davies Bouldin index): https://www.mathworks.com/matlabcentral/fileexchange/118685-auto-cvi-tool-an-automatic-cluster-validity-index-toolbox?s_tid=srchtitle (download all files)
 
@@ -20,7 +20,7 @@ For running files in Matlab, there are some functions listed below must be insta
 
 
 
-Other Matlab files has been added to the repository for convinence and here are the reference: 
+Other Matlab files has been added to the repository for convinence and here are the references: 
 - CHI.m (Calinski-Harabasz Criterion)
 - LDA (Linear Discriminant Analysis): https://www.mathworks.com/matlabcentral/fileexchange/53151-linear-discriminant-analysis-lda-aka-fisher-discriminant-analysis-fda?s_tid=srchtitle
 

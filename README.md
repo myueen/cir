@@ -6,31 +6,39 @@ contrastive_inverse_regression
 This repository contains Matlab files and notebooks to reproduce results in clustering analysis and classification accuracy of various dimension reduction methods for biomedical data experiments. (see [manuscript](
 https://doi.org/10.48550/arXiv.2305.12287)). 
 
-This repository contains the main contrastive-inverse-regression (CIR) algorithm in both Matlab and python. But since clustering analysis and classification analysis are conducted in Matlab, it is our intent for the
-purpose of reproducibity to use the Matlab file (CIR.m) when running matlab files in the experiments folder. The python package is available as an feasible alternative. 
+This repository contains the main contrastive-inverse-regression (CIR) algorithm in both Matlab and python. But since clustering analysis and classification analysis are conducted in Matlab, it is our intent for the purpose of reproducibility to use the Matlab file (CIR.m) when running Matlab files in the experiments folder. The python package is available as an feasible alternative. 
 
 
 Matlab files Dependency 
 -----------------------
-When running Matlab files, there are some functions listed below that must be installed in advance, and adding these installed file paths to the current directory where the Matlab files in *experiments* folder is executed on the local computer is also essential. 
+When running Matlab files, there some some functions listed below that must be installed in advance, and adding these installed file paths to the current directory where the Matlab files in *experiments* folder is executed on the local computer is also essential. 
 
-- **dbindex** (Davies Bouldin index): https://www.mathworks.com/matlabcentral/fileexchange/118685-auto-cvi-tool-an-automatic-cluster-validity-index-toolbox?s_tid=srchtitle (download all files)
+- **dbindex** (Davies Bouldin index): [download here](https://www.mathworks.com/matlabcentral/fileexchange/118685-auto-cvi-tool-an-automatic-cluster-validity-index-toolbox?s_tid=srchtitle) (download all files)
 
-- **UMAP** (uniform manifold approximation and projection): https://www.mathworks.com/matlabcentral/fileexchange/71902-uniform-manifold-approximation-and-projection-umap (download all files)
+- **UMAP** (uniform manifold approximation and projection): [download here](https://www.mathworks.com/matlabcentral/fileexchange/71902-uniform-manifold-approximation-and-projection-umap )(download all files)
 
 
 
 Other Matlab files has been added to the repository for convinence and here are the references: 
 - CHI.m (Calinski-Harabasz Criterion)
 - [LDA](https://www.mathworks.com/matlabcentral/fileexchange/53151-linear-discriminant-analysis-lda-aka-fisher-discriminant-analysis-fda?s_tid=srchtitle) (Linear Discriminant Analysis): 
-- [SGPM](https://www.mathworks.com/matlabcentral/fileexchange/73505-sgpm-for-minimization-over-the-stiefel-manifold) [2]
+- SGPM (Oviedo, 2024)[2]
 
 
 Data
 ----
 For Mouse Protein analysis
-- 
+- 'Data_Cortex_Nuclear.csv' is available in the repository. Reference on Github abidlabs/contrastive [here](https://github.com/abidlabs/contrastive/blob/master/experiments/datasets/Data_Cortex_Nuclear.csv).
 
+For Single Cell RNA Sequencing analysis
+- 'pbmc_1_counts.csv' and 'pbmc_1_cell_type.csv' both available in the repository 
+
+For Plasma Retinol analysis
+- 'Retinol.txt' is available in the repository
+
+For COVID-19 analysis 
+- The raw files 'PBMC_COVID.subsample500cells.covid.h5ad' for foreground (h5ad_files_covid) and 'PBMC_COVID.subsample500cells.ctrl.h5ad' for background is available in [figshare](https://figshare.com/articles/dataset/Precise_disease-state_identification_with_healthy_single-cell_references_-_processed_datasets_and_models/21456645)
+- This dataset is referenced [here](https://github.com/MarioniLab/oor_design_reproducibility/tree/master?tab=readme-ov-file)
 
 
 

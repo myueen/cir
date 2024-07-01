@@ -1,11 +1,36 @@
 [![Python Package Index](https://img.shields.io/pypi/v/contrastive-inverse-regression.svg)](https://pypi.org/project/contrastive-inverse-regression)
 
-
 contrastive_inverse_regression
 ======
 
+This repository contains Matlab files and notebooks to reproduce results in clustering analysis and classification accuracy of various dimension reduction methods for experiments using biomedical data. (see [manuscript](
+https://doi.org/10.48550/arXiv.2305.12287)). 
 
-cir is a python package provided the algorithm for contrastive inverse regression (CIR) for dimension reduction used in a supervised setting to find a low-dimensional representation by solving a nonconvex optimization problem on the Stiefel manifold. 
+This repository contains the main contrastive-inverse-regression (CIR) algorithm in both Matlab and python version. But since clustering analysis and classification analysis are conducted in Matlab, it is our intend for the
+purpose of reproducibity of the result to use the Matlab file (CIR.m). The python package is available as an feasible alternative. 
+
+
+Matlab files Dependency 
+-----------------------
+For running files in Matlab, there are some functions listed below must be installed in advance, and adding these paths to the current directory where the Matlab files in *experiments* is executed on the local computer is also essential. 
+
+- dbindex (Davies Bouldin index): https://www.mathworks.com/matlabcentral/fileexchange/118685-auto-cvi-tool-an-automatic-cluster-validity-index-toolbox?s_tid=srchtitle (download all files)
+
+- UMAP (uniform manifold approximation and projection): https://www.mathworks.com/matlabcentral/fileexchange/71902-uniform-manifold-approximation-and-projection-umap (download all files)
+
+
+
+Other Matlab files has been added to the repository for convinence and here are the reference: 
+- CHI.m (Calinski-Harabasz Criterion)
+- LDA (Linear Discriminant Analysis): https://www.mathworks.com/matlabcentral/fileexchange/53151-linear-discriminant-analysis-lda-aka-fisher-discriminant-analysis-fda?s_tid=srchtitle
+
+- SGPM: https://www.mathworks.com/matlabcentral/fileexchange/73505-sgpm-for-minimization-over-the-stiefel-manifold
+
+
+
+Python package details
+-----------------------
+contrastive-inverse-regression is a python package provided the algorithm for contrastive inverse regression (CIR) for dimension reduction used in a supervised setting to find a low-dimensional representation by solving a nonconvex optimization problem on the Stiefel manifold. 
 
 
 Installation
@@ -62,11 +87,11 @@ Yt = Yt.iloc[0:, 1:]
 V = CIR(fg, Y, bg, Yt, alpha, d)
 
 ```
-Other detailed examples for employing cir are provided. 
+Other detailed examples for employing CIR are provided. 
 
 For the case of discrete foreground Y values, the mouse protein dataset  Data_Cortex_Nuclear.csv is used and the corresponding visualization in mp_regression.py and regression testing in mp_regression.py.
 
-For the case of continuous foreground Y values, cir is applied on the retinol dataset Retinol.txt and the corresponding regression is in plasma_regression.py. Continuous values are not usually for classification, hence visualization is not provided. 
+For the case of continuous foreground Y values, CIR is applied on the retinol dataset Retinol.txt and the corresponding regression is in plasma_regression.py. Continuous values are not usually for classification, hence visualization is not provided. 
 
 
 

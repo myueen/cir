@@ -6,6 +6,9 @@ contrastive_inverse_regression
 This repository contains Matlab files and notebooks to reproduce results in clustering analysis and classification accuracy of various dimension reduction methods for biomedical data experiments. (see [manuscript](
 https://doi.org/10.48550/arXiv.2305.12287)). 
 
+
+Reproducibility
+---------------- 
 This repository contains the main contrastive-inverse-regression (CIR) algorithm in both Matlab and python. But since clustering analysis and classification analysis are conducted in Matlab, it is our intent for the purpose of reproducibility to use the Matlab file (CIR.m) when running Matlab files in the experiments folder. The python package is available as an feasible alternative. 
 
 

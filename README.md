@@ -22,9 +22,32 @@ When running Matlab files, there are some functions listed below that must be in
 
 Other Matlab files has been added to the repository for convinence and here are the references: 
 - CHI.m (Calinski-Harabasz Criterion)
-- LDA (Linear Discriminant Analysis): https://www.mathworks.com/matlabcentral/fileexchange/53151-linear-discriminant-analysis-lda-aka-fisher-discriminant-analysis-fda?s_tid=srchtitle
+- [LDA](https://www.mathworks.com/matlabcentral/fileexchange/53151-linear-discriminant-analysis-lda-aka-fisher-discriminant-analysis-fda?s_tid=srchtitle) (Linear Discriminant Analysis): 
+- [SGPM](https://www.mathworks.com/matlabcentral/fileexchange/73505-sgpm-for-minimization-over-the-stiefel-manifold)
 
-- SGPM: https://www.mathworks.com/matlabcentral/fileexchange/73505-sgpm-for-minimization-over-the-stiefel-manifold
+
+Data
+----
+For Mouse Protein analysis
+- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

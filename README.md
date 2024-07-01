@@ -118,12 +118,12 @@ Yt = Yt.iloc[0:, 1:]
 V = CIR(fg, Y, bg, Yt, alpha, d) -->
 
 <!-- ``` -->
-Other detailed examples for employing CIR are provided. 
+<!-- Other detailed examples for employing CIR are provided. 
 
 For the case of discrete foreground Y values, the mouse protein dataset  Data_Cortex_Nuclear.csv is used and the corresponding visualization in mp_regression.py and regression testing in mp_regression.py.
 
 For the case of continuous foreground Y values, CIR is applied on the retinol dataset Retinol.txt and the corresponding regression is in plasma_regression.py. Continuous values are not usually for classification, hence visualization is not provided. 
-
+ -->
 
 
 Citing contrastive-inverse-regression

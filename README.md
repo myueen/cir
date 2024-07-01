@@ -37,14 +37,9 @@ For Plasma Retinol analysis
 - 'Retinol.txt' is available in the repository
 
 For COVID-19 analysis 
-- The raw files 'PBMC_COVID.subsample500cells.covid.h5ad' for foreground (h5ad_files_covid) and 'PBMC_COVID.subsample500cells.ctrl.h5ad' for background is available in [figshare](https://figshare.com/articles/dataset/Precise_disease-state_identification_with_healthy_single-cell_references_-_processed_datasets_and_models/21456645)
+- The raw files 'PBMC_COVID.subsample500cells.covid.h5ad' for foreground and 'PBMC_COVID.subsample500cells.ctrl.h5ad' for background is available in [figshare](https://figshare.com/articles/dataset/Precise_disease-state_identification_with_healthy_single-cell_references_-_processed_datasets_and_models/21456645)
 - This dataset is referenced [here](https://github.com/MarioniLab/oor_design_reproducibility/tree/master?tab=readme-ov-file)
-
-
-
-
-
-
+- The preprocessed files (i.e., covid_preprocessed_fg,csv.zip) are available in the repository. 
 
 
 
@@ -93,7 +88,7 @@ To run exmaple, matplotlib (>= 3.8.2) is required
 
 
 
-Example
+<!-- Example
 --------
 The dataset for the following example is included in the example/dataset folder. 
 ```python
@@ -115,7 +110,7 @@ bg = bg.iloc[0:, 1:]
 Y = Y.iloc[0:, 1:]
 Yt = Yt.iloc[0:, 1:]
 
-V = CIR(fg, Y, bg, Yt, alpha, d)
+V = CIR(fg, Y, bg, Yt, alpha, d) -->
 
 ```
 Other detailed examples for employing CIR are provided. 

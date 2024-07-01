@@ -1,10 +1,10 @@
 clear
 close all
 
-fg = readtable('covid_preprocessed_fg.csv');
-bg = readtable('covid_preprocessed_bg.csv');
-Y = readtable('covid_preprocessed_Y.csv');
-Yt = readtable('covid_preprocessed_Yt.csv');
+fg = readtable('.../covid_preprocessed_fg.csv');
+bg = readtable('.../covid_preprocessed_bg.csv');
+Y = readtable('.../covid_preprocessed_Y.csv');
+Yt = readtable('.../covid_preprocessed_Yt.csv');
 
 fg = fg(2:end, 2:end);
 bg = bg(2:end, 2:end);

@@ -1,7 +1,7 @@
 clear
 close all
 
-data = readtable('Data_Cortex_Nuclear.csv');
+data = readtable('.../Data_Cortex_Nuclear.csv');
 
 % foreground data
 fg = data;

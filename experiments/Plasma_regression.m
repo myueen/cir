@@ -2,7 +2,7 @@ clear
 close all
 
 
-data = readtable('Retinol.txt');
+data = readtable('.../Retinol.txt');
 data = data{:,:};
 
 

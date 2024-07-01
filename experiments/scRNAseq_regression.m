@@ -2,10 +2,10 @@ clear
 close all
 
 
-data = readtable('pbmc_1_counts.csv');
+data = readtable('.../pbmc_1_counts.csv');
 data = data{:,2:size(data,2)};
 data = data.';
-cell_type = readtable('pbmc_1_cell_type.csv');
+cell_type = readtable('.../pbmc_1_cell_type.csv');
 cell_type = cell_type{:,2};
 
 % foregroun data

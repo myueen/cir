@@ -11,7 +11,7 @@ Reproducibility
 ---------------- 
 This repository contains the main contrastive-inverse-regression (CIR) algorithm in both Matlab and python. But since clustering analysis and classification analysis are conducted in Matlab, it is our intent for the purpose of reproducibility to use the Matlab file (CIR.m) when running Matlab files in the experiments folder. The python package is available as an feasible alternative. 
 
-Remark: the implementation of SIR involves the generalized eigen-decomposition, eig(), which may differ across languages or versions in Matlab. Please make sure the eigenvalues are in descending order before taking the top d eigenvectors for SIR. 
+**Remark**: the implementation of SIR involves the generalized eigen-decomposition, eig(), which may differ across languages or versions in Matlab. Please make sure the eigenvalues are in descending order before taking the top d eigenvectors for SIR. 
 
 Matlab files Dependency 
 -----------------------
